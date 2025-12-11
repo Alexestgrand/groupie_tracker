@@ -1,10 +1,9 @@
 package main
 
 import (
+	"groupie-tracker-ng/handlers"
 	"log"
 	"net/http"
-
-	"groupie-tracker-ng/handlers"
 )
 
 func main() {
@@ -18,10 +17,11 @@ func main() {
 	http.HandleFunc("/map", handlers.MapHandler)
 	http.HandleFunc("/location/", handlers.LocationHandler)
 
-	port := ":8080"
+	port := ":8000"
 	log.Printf("🚀 Serveur démarré sur http://localhost%s", port)
-	log.Printf("📁 Fichiers statiques servis depuis ./static")
-	log.Printf("📄 Templates servis depuis ./templates")
+	log.Printf("🚀 Serveur également accessible sur http://[::1]%s", port)
+
+	//suppression des messages inutiles
 
 	log.Fatal(http.ListenAndServe(port, nil))
 }
