@@ -322,7 +322,8 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
     - Ajouter la gestion des filtres dans `ArtistsHandler`
     - Ajouter la gestion de la recherche
 
-13. **`templates/artists.html`** (modification)
+            // Baptise ----------------------------------------------------------------------------
+13. **`templates/artists.html`** (modification) 
     - Ajouter le formulaire de recherche
     - Ajouter les formulaires de filtres
     - Intégrer les suggestions JavaScript
@@ -526,4 +527,6 @@ HTML avec liste des artistes
 ---
 
 **Bon développement ! 🚀**
+
+
 

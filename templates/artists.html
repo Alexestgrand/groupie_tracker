@@ -1,6 +1,32 @@
 {{define "content"}}
 <div class="artists-page">
     <h1>Liste des Artistes</h1>
-    <p>Fonctionnalité en cours de développement</p>
+    
+    {{if .Artists}}
+    <div class="artists-grid">
+        {{range .Artists}}
+        <div class="artist-card">
+            <a href="/artist/{{.ID}}">
+                {{if .Image}}
+                <img src="{{.Image}}" alt="{{.Name}}" class="artist-image">
+                {{else}}
+                <div class="artist-image-placeholder">🎵</div>
+                {{end}}
+                <div class="artist-info">
+                    <h3>{{.Name}}</h3>
+                    {{if .Genres}}
+                    <p><strong>Genres :</strong> {{range $index, $genre := .Genres}}{{if $index}}, {{end}}{{$genre}}{{end}}</p>
+                    {{end}}
+                    {{if .SpotifyURL}}
+                    <a href="{{.SpotifyURL}}" target="_blank" class="btn btn-primary btn-small">Écouter sur Spotify</a>
+                    {{end}}
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <p class="no-results">Aucun artiste trouvé.</p>
+    {{end}}
 </div>
 {{end}}
