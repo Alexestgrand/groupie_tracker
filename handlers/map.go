@@ -10,10 +10,22 @@ import (
 
 // MapHandler gère la page de la carte interactive
 func MapHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	// Récupérer tous les artistes populaires depuis Spotify
 	spotifyArtists, err := spotifyClient.FetchPopularArtists()
 	if err != nil {
 		utils.HandleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Vérifier qu'on a des artistes
+	if len(spotifyArtists) == 0 {
+		utils.RenderError(w, http.StatusNotFound, "Aucun artiste disponible pour la carte")
 		return
 	}
 
