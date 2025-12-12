@@ -1,6 +1,26 @@
 {{define "content"}}
-<div class="artist-detail">
-    <h1>Détails de l'artiste</h1>
-    <p>Fonctionnalité en cours de développement</p>
+<div class="container detail-container">
+    <div class="artist-header">
+        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img">
+        <div class="artist-info">
+            <h1>{{.Artist.Name}}</h1>
+            
+            <p><strong>Popularité Spotify :</strong> {{.Artist.Popularity}}/100</p>
+            <p><strong>Followers :</strong> {{.Artist.Followers}}</p>
+            
+            <div class="genres-list">
+                <strong>Genres :</strong>
+                {{range .Artist.Genres}}
+                    <span class="genre-tag">{{.}}</span>
+                {{end}}
+            </div>
+
+            <a href="{{.Artist.SpotifyURL}}" target="_blank" class="btn-spotify">Écouter sur Spotify</a>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    </div>
 </div>
 {{end}}
