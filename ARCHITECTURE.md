@@ -182,8 +182,8 @@ var (
 ```go
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
     templates := template.Must(template.ParseFiles(
-        "templates/layout.html",
-        "templates/"+tmpl,
+        "../templates/layout.html",
+        "../templates/"+tmpl,
     ))
     templates.ExecuteTemplate(w, "layout", data)
 }
@@ -322,7 +322,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
     - Ajouter la gestion des filtres dans `ArtistsHandler`
     - Ajouter la gestion de la recherche
 
-            // Baptise ----------------------------------------------------------------------------
+            // Baptise 13, 14 ,23 ,24 ----------------------------------------------------------------------------
 13. **`templates/artists.html`** (modification) 
     - Ajouter le formulaire de recherche
     - Ajouter les formulaires de filtres
