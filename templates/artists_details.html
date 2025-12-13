@@ -1,26 +1,39 @@
 {{define "content"}}
-<div class="container detail-container">
+<div class="artist-detail">
+    <a href="/artists" class="back-link">← Retour à la liste</a>
+    
     <div class="artist-header">
-        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img">
-        <div class="artist-info">
+        {{if .Artist.Image}}
+        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="artist-detail-image">
+        {{else}}
+        <div class="artist-detail-image-placeholder">🎵</div>
+        {{end}}
+        <div class="artist-detail-info">
             <h1>{{.Artist.Name}}</h1>
-            
-            <p><strong>Popularité Spotify :</strong> {{.Artist.Popularity}}/100</p>
+            {{if .Artist.Popularity}}
+            <p><strong>Popularité :</strong> {{.Artist.Popularity}}/100</p>
+            {{end}}
+            {{if .Artist.Followers}}
             <p><strong>Followers :</strong> {{.Artist.Followers}}</p>
-            
-            <div class="genres-list">
-                <strong>Genres :</strong>
-                {{range .Artist.Genres}}
-                    <span class="genre-tag">{{.}}</span>
-                {{end}}
-            </div>
-
-            <a href="{{.Artist.SpotifyURL}}" target="_blank" class="btn-spotify">Écouter sur Spotify</a>
+            {{end}}
+            {{if .Artist.SpotifyURL}}
+            <a href="{{.Artist.SpotifyURL}}" target="_blank" class="btn btn-primary">Écouter sur Spotify</a>
+            {{end}}
         </div>
     </div>
-    
-    <div class="actions">
-        <a href="/artists" class="btn-back">← Retour à la liste</a>
+
+    <div class="artist-content">
+        {{if .Artist.Genres}}
+        <section class="genres-section">
+            <h2>Genres musicaux</h2>
+            <ul class="genres-list">
+                {{range .Artist.Genres}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+        </section>
+        {{end}}
+
     </div>
 </div>
 {{end}}
