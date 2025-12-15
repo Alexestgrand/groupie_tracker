@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{if .Title}}{{.Title}} - {{end}}Groupie Tracker</title>
+    <title>Groupie Tracker</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <div class="container">
-                <a href="/" class="logo">Groupie Tracker</a>
-                <ul class="nav-links">
-                    <li><a href="/">Accueil</a></li>
-                    <li><a href="/artists">Artistes</a></li>
-                    <li><a href="/map">Carte</a></li>
-                </ul>
-            </div>
+            <div class="logo">GROUPIE TRACKER</div>
+            <ul class="nav-links">
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/artists">Artistes</a></li>
+                <li><a href="/map">Carte</a></li>
+            </ul>
         </nav>
     </header>
 
-    <main class="container">
+    <main>
         {{block "content" .}}{{end}}
     </main>
 
     <footer>
-        <div class="container">
-            <p>&copy; ça c le groupie tracker frérot fé pas chier</p>
-        </div>
+        <p>&copy; 2024 Groupie Tracker - Projet 01</p>
     </footer>
 
     <script src="/static/js/script.js"></script>
