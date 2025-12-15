@@ -11,9 +11,23 @@ import (
 
 // SearchHandler gère la recherche d'artistes
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	query := r.URL.Query().Get("q")
+
+	// Valider la requête
 	if query == "" {
 		http.Redirect(w, r, "/artists", http.StatusSeeOther)
+		return
+	}
+
+	// Valider la longueur de la requête
+	if len(query) < 1 || len(query) > 100 {
+		utils.RenderError(w, http.StatusBadRequest, "Requête de recherche invalide (1-100 caractères)")
 		return
 	}
 
@@ -51,6 +65,14 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 // SuggestionsHandler retourne des suggestions JSON pour la barre de recherche
 func SuggestionsHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Méthode non autorisée"})
+		return
+	}
+
 	query := r.URL.Query().Get("q")
 	if query == "" {
 		w.Header().Set("Content-Type", "application/json")
@@ -58,9 +80,18 @@ func SuggestionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Valider la longueur de la requête
+	if len(query) > 100 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Requête trop longue"})
+		return
+	}
+
 	// Récupérer tous les artistes populaires
 	spotifyArtists, err := spotifyClient.FetchPopularArtists()
 	if err != nil {
+		// En cas d'erreur, retourner un tableau vide plutôt qu'une erreur
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode([]string{})
 		return

@@ -11,10 +11,22 @@ import (
 
 // ArtistsHandler gère la liste des artistes
 func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	// Récupérer les artistes depuis l'API Spotify
 	spotifyArtists, err := spotifyClient.FetchPopularArtists()
 	if err != nil {
 		utils.HandleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Vérifier qu'on a des artistes
+	if len(spotifyArtists) == 0 {
+		utils.RenderError(w, http.StatusNotFound, "Aucun artiste trouvé")
 		return
 	}
 
@@ -44,18 +56,31 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ArtistDetailHandler gère la page de détails d'un artiste
 func ArtistDetailHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	// Extraire l'ID Spotify de l'URL (format: /artist/4uLU6hMCjMI75M1A2tKUQC)
 	artistID := strings.TrimPrefix(r.URL.Path, "/artist/")
 
+	// Valider l'ID
 	if artistID == "" {
-		utils.RenderError(w, http.StatusBadRequest, "ID d'artiste invalide")
+		utils.RenderError(w, http.StatusBadRequest, "ID d'artiste invalide ou manquant")
+		return
+	}
+
+	// Valider le format de l'ID Spotify (doit contenir des caractères alphanumériques)
+	if len(artistID) < 10 || len(artistID) > 30 {
+		utils.RenderError(w, http.StatusBadRequest, "Format d'ID d'artiste invalide")
 		return
 	}
 
 	// Récupérer les détails complets de l'artiste depuis l'API Spotify
 	fullArtist, err := spotifyClient.GetArtistByID(artistID)
 	if err != nil {
-		utils.RenderError(w, http.StatusNotFound, "Artiste non trouvé")
+		utils.RenderError(w, http.StatusNotFound, "Artiste non trouvé sur Spotify")
 		return
 	}
 

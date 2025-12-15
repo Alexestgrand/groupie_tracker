@@ -12,11 +12,30 @@ import (
 
 // LocationHandler gère la page listant les concerts à un lieu spécifique
 func LocationHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	// Extraire le lieu de l'URL (format: /location/ville)
 	locationPath := r.URL.Path[len("/location/"):]
+
+	// Valider que le chemin n'est pas vide
+	if locationPath == "" {
+		utils.RenderError(w, http.StatusBadRequest, "Lieu non spécifié")
+		return
+	}
+
 	location, err := url.PathUnescape(locationPath)
 	if err != nil {
-		utils.RenderError(w, http.StatusBadRequest, "Lieu invalide")
+		utils.RenderError(w, http.StatusBadRequest, "Lieu invalide dans l'URL")
+		return
+	}
+
+	// Valider la longueur du lieu
+	if len(location) < 1 || len(location) > 100 {
+		utils.RenderError(w, http.StatusBadRequest, "Nom de lieu invalide")
 		return
 	}
 

@@ -4,10 +4,17 @@ import (
 	"net/http"
 
 	"groupie-tracker-ng/api"
+	"groupie-tracker-ng/utils"
 )
 
 // GimsHandler gère la route spéciale "gims"
 func GimsHandler(w http.ResponseWriter, r *http.Request) {
+	// Vérifier que la méthode HTTP est GET
+	if r.Method != http.MethodGet {
+		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
+		return
+	}
+
 	// Rechercher l'artiste "GIMS" sur Spotify
 	spotifyArtist, err := spotifyClient.SearchArtist("GIMS")
 	if err != nil {
@@ -23,12 +30,18 @@ func GimsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if foundArtist == nil {
-			// Si toujours pas trouvé, rediriger vers la liste des artistes
-			http.Redirect(w, r, "/artists", http.StatusSeeOther)
+			// Si toujours pas trouvé, afficher une erreur 404
+			utils.RenderError(w, http.StatusNotFound, "Artiste GIMS non trouvé sur Spotify")
 			return
 		}
 
 		spotifyArtist = foundArtist
+	}
+
+	// Valider que l'artiste a un ID valide
+	if spotifyArtist.ID == "" {
+		utils.RenderError(w, http.StatusInternalServerError, "Erreur lors de la récupération de l'artiste")
+		return
 	}
 
 	// Rediriger vers la page de détails de GIMS

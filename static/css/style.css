@@ -1,418 +1,280 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* static/css/style.css */
 :root {
-    --primary-color: #6366f1;
-    --secondary-color: #8b5cf6;
-    --text-color: #1f2937;
-    --bg-color: #f9fafb;
-    --card-bg: #ffffff;
-    --border-color: #e5e7eb;
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --accent: #1db954; /* Vert type Spotify */
+    --accent-hover: #1ed760;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    color: var(--text-color);
     background-color: var(--bg-color);
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    color: var(--text-primary);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    width: 100%;
-}
-
-/* Header et Navigation */
-header {
-    background-color: var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
+/* Navigation */
 .navbar {
-    padding: 1rem 0;
-}
-
-.navbar .container {
+    background-color: #000;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
 .nav-links {
-    display: flex;
     list-style: none;
-    gap: 2rem;
+    display: flex;
+    gap: 20px;
 }
 
 .nav-links a {
-    color: var(--text-color);
+    color: var(--text-primary);
     text-decoration: none;
-    transition: color 0.3s;
+    font-weight: bold;
 }
 
-.nav-links a:hover {
-    color: var(--primary-color);
+/* Conteneur principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-/* Main content */
-main {
-    flex: 1;
-    padding: 2rem 0;
-}
-
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #4f46e5;
-}
-
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #7c3aed;
-}
-
-/* Home Page */
-.home-hero {
-    text-align: center;
-    padding: 4rem 0;
-}
-
-.home-hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.lead {
-    font-size: 1.25rem;
-    color: #6b7280;
-    margin-bottom: 2rem;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-/* Footer */
-footer {
+/* Barre de Recherche et Filtres (Phase 13) */
+.controls-section {
     background-color: var(--card-bg);
-    padding: 2rem 0;
-    margin-top: auto;
-    text-align: center;
-    color: #6b7280;
-    border-top: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
 }
 
-/* Artists Page */
-.artists-page {
-    padding: 2rem 0;
+.search-container {
+    position: relative; /* Pour positionner les suggestions */
+    margin-bottom: 20px;
 }
 
+.search-input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background-color: #333;
+    color: white;
+    font-size: 1rem;
+}
+
+/* Suggestions JS (Phase 14) */
+.suggestions-box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #333;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none; /* Caché par défaut */
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+}
+
+.suggestion-item:hover {
+    background-color: var(--accent);
+    color: black;
+}
+
+/* Filtres */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    margin-bottom: 5px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Grille des artistes (Phase 24) */
 .artists-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
 }
 
 .artist-card {
-    background: var(--card-bg);
-    border-radius: 0.5rem;
+    background-color: var(--card-bg);
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    padding-bottom: 15px;
 }
 
 .artist-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
-.artist-card a {
-    text-decoration: none;
-    color: inherit;
-}
-
-.artist-image {
+.artist-card img {
     width: 100%;
-    height: 300px;
+    height: 200px;
     object-fit: cover;
 }
 
-.artist-image-placeholder {
-    width: 100%;
-    height: 300px;
-    background: var(--bg-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
+.artist-name {
+    margin: 10px 0;
+    font-size: 1.2rem;
 }
 
-.artist-detail-image-placeholder {
-    width: 300px;
-    height: 300px;
-    background: var(--bg-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 6rem;
-    border-radius: 0.5rem;
-}
-
-.btn-small {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
-
-.artist-info {
-    padding: 1.5rem;
-}
-
-.artist-info h3 {
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
-
-.artist-info p {
-    margin: 0.5rem 0;
-    color: #6b7280;
-}
-
-/* Artist Detail Page */
-.artist-detail {
-    padding: 2rem 0;
-}
-
-.back-link {
+.btn-details {
     display: inline-block;
-    margin-bottom: 2rem;
-    color: var(--primary-color);
+    padding: 8px 20px;
+    background-color: var(--accent);
+    color: white;
     text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
 }
 
-.back-link:hover {
-    text-decoration: underline;
+.btn-details:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-filter {
+    background-color: #333;
+    color: white;
+    border: 1px solid white;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+/* Ajouts spécifiques pour le look Spotify */
+
+.artist-genres {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+
+.genre-tag {
+    background-color: #333;
+    color: #1db954; /* Vert Spotify */
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    border: 1px solid #1db954;
+}
+
+.btn-search {
+    padding: 12px 20px;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.btn-spotify {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #1db954;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-spotify:hover {
+    background-color: #1ed760;
+}
+
+.detail-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .artist-header {
     display: flex;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    background: var(--card-bg);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    gap: 40px;
+    background: #1e1e1e;
+    padding: 40px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
-.artist-detail-image {
+.detail-img {
     width: 300px;
     height: 300px;
     object-fit: cover;
-    border-radius: 0.5rem;
+    border-radius: 50%; /* Image ronde style profil artiste */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-.artist-detail-info h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
+/* --- Ajout pour la page d'accueil (Home) --- */
 
-.artist-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-}
-
-.genres-section {
-    background: var(--card-bg);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.genres-section h2 {
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.members-list {
-    list-style: none;
-}
-
-.members-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.concerts-list {
+.home-container {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.concert-item {
-    padding: 1rem;
-    background: var(--bg-color);
-    border-radius: 0.5rem;
-}
-
-.concert-item h3 a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-
-.concert-item h3 a:hover {
-    text-decoration: underline;
-}
-
-.dates-list {
-    list-style: none;
-    margin-top: 0.5rem;
-}
-
-.dates-list li {
-    padding: 0.25rem 0;
-    color: #6b7280;
-}
-
-/* Spotify Section */
-.spotify-section {
-    background: var(--card-bg);
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.spotify-section h2 {
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.spotify-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.genres h3 {
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-}
-
-.genres-list {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.genres-list li {
-    background: var(--primary-color);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
-    font-size: 0.9rem;
-}
-
-.spotify-link {
-    margin-top: 1rem;
-}
-
-/* Error Page */
-.error-page {
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* Prend 80% de la hauteur de l'écran */
     text-align: center;
-    padding: 4rem 0;
 }
 
-.error-page h1 {
-    font-size: 6rem;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
+.hero-section {
+    background-color: var(--card-bg);
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    max-width: 600px;
+    width: 100%;
 }
 
-.error-page h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
+.main-title {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: var(--accent);
 }
 
-.error-page p {
-    font-size: 1.25rem;
-    color: #6b7280;
-    margin-bottom: 2rem;
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
 }
 
-.no-results {
-    text-align: center;
-    padding: 3rem;
-    color: #6b7280;
-    font-size: 1.25rem;
+.home-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .nav-links {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .home-hero h1 {
-        font-size: 2rem;
-    }
-
-    .cta-buttons {
-        flex-direction: column;
-    }
-
-    .artist-header {
-        flex-direction: column;
-    }
-
-    .artist-detail-image {
-        width: 100%;
-    }
-
-    .artists-grid {
-        grid-template-columns: 1fr;
-    }
+.btn-large {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
