@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes" // Ne pas oublier cet import
 	"html/template"
 	"log"
 	"net/http"
@@ -8,16 +9,27 @@ import (
 
 // renderTemplate rend un template HTML avec les données fournies
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	// Parser les templates avec le layout de base
-	templates := template.Must(template.ParseFiles(
+	// 1. Parser les templates
+	templates, err := template.ParseFiles(
 		"templates/layout.html",
 		"templates/"+tmpl,
-	))
-
-	// Exécuter le template layout qui contient le bloc "content"
-	// Le bloc "content" sera rempli par le template enfant (home.html, artists.html, etc.)
-	if err := templates.ExecuteTemplate(w, "layout.html", data); err != nil {
-		log.Printf("Erreur lors du rendu du template %s: %v", tmpl, err)
-		http.Error(w, "Erreur interne du serveur", http.StatusInternalServerError)
+	)
+	if err != nil {
+		log.Printf("Erreur lors du parsing du template %s: %v", tmpl, err)
+		http.Error(w, "Erreur interne du serveur - Template non trouvé", http.StatusInternalServerError)
+		return
 	}
+
+	// 2. Utiliser un buffer pour préparer le rendu en mémoire
+	buf := new(bytes.Buffer)
+	if err := templates.ExecuteTemplate(buf, "layout.html", data); err != nil {
+		log.Printf("Erreur lors du rendu du template %s: %v", tmpl, err)
+		// Ici, rien n'a été envoyé à 'w', donc on peut envoyer une erreur propre
+		http.Error(w, "Erreur interne du serveur - Erreur de rendu", http.StatusInternalServerError)
+		return
+	}
+
+	// 3. Si tout est ok, envoyer le contenu du buffer à la réponse
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	buf.WriteTo(w)
 }

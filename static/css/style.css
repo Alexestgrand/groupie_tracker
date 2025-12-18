@@ -1,159 +1,808 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* =============== Variables (thème One Piece) =============== */
+:root {
+    --bg-main: #020716;          /* Nuit sur la mer */
+    --bg-elevated: #050b1f;
+    --accent-gold: #f5b917;      /* Or de One Piece */
+    --accent-red: #e63946;       /* Rouge Luffy */
+    --accent-blue: #1b6fa8;      /* Bleu océan */
+    --accent-sand: #f1e3c6;      /* Couleur sable */
+    --text-main: #f5f5f5;
+    --text-muted: #9ca3af;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.55);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-pill: 999px;
+    --transition-fast: 0.18s ease-out;
+    --transition-med: 0.26s ease-out;
 }
 
-:root {
-    --primary-color: #6366f1;
-    --secondary-color: #8b5cf6;
-    --text-color: #1f2937;
-    --bg-color: #f9fafb;
-    --card-bg: #ffffff;
-    --border-color: #e5e7eb;
+/* =============== Reset / base =============== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    color: var(--text-color);
-    background-color: var(--bg-color);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #081426 0, #020716 45%, #000 100%);
+    color: var(--text-main);
     line-height: 1.6;
+}
+
+/* Légère texture “brume de mer” */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 10% 0, rgba(245, 185, 23, 0.07), transparent 60%),
+                radial-gradient(circle at 90% 100%, rgba(27, 111, 168, 0.12), transparent 55%);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.35;
+    z-index: -1;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+/* =============== Layout global =============== */
+
+body > header,
+body > main,
+body > footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Si ton layout.html utilise un container principal, adapte ici */
+.main-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    width: 100%;
+main {
+    flex: 1;
+    padding: 2.5rem 0 3rem;
 }
 
-/* Header et Navigation */
+/* =============== Header / Navbar =============== */
+
 header {
-    background-color: var(--card-bg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    padding: 1.4rem 0 0.8rem;
 }
 
 .navbar {
-    padding: 1rem 0;
-}
-
-.navbar .container {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 1.2rem;
+    justify-content: space-between;
+    border-radius: var(--radius-pill);
+    padding: 0.7rem 1.2rem;
+    background: linear-gradient(135deg, rgba(5, 11, 31, 0.9), rgba(8, 20, 46, 0.9));
+    border: 1px solid var(--border-soft);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
 }
 
-.logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    text-decoration: none;
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+/* “Jolly Roger” minimaliste */
+.logo-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: radial-gradient(circle at 30% 0, #fff 0, #f1e3c6 48%, #f5b917 100%);
+    box-shadow: 0 0 0 2px rgba(245, 185, 23, 0.3);
+}
+
+.logo-circle::before,
+.logo-circle::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    background: #111;
+    border-radius: 999px;
+}
+
+.logo-circle::before {
+    transform: rotate(24deg);
+}
+
+.logo-circle::after {
+    transform: rotate(-24deg);
+}
+
+.logo-initials {
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    color: #111;
+}
+
+.site-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.site-title-main {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.site-title-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
 }
 
 .nav-links {
     display: flex;
-    list-style: none;
-    gap: 2rem;
+    align-items: center;
+    gap: 0.7rem;
 }
 
 .nav-links a {
-    color: var(--text-color);
-    text-decoration: none;
-    transition: color 0.3s;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    border: 1px solid transparent;
+    transition: background var(--transition-fast), color var(--transition-fast),
+                border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .nav-links a:hover {
-    color: var(--primary-color);
+    color: var(--accent-sand);
+    border-color: rgba(245, 185, 23, 0.5);
+    background: radial-gradient(circle at top, rgba(245, 185, 23, 0.18), transparent 60%);
+    transform: translateY(-1px);
 }
 
-/* Main content */
-main {
-    flex: 1;
-    padding: 2rem 0;
+.nav-links a.nav-active {
+    color: #111;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-red));
+    border-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Buttons */
+/* =============== Boutons génériques =============== */
+
 .btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: var(--radius-pill);
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    transition: all 0.3s;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-red));
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+                filter var(--transition-fast), background-position 0.25s ease-out;
+    background-size: 160%;
+    background-position: 10% 50%;
 }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+    filter: brightness(1.05);
+    background-position: 90% 50%;
 }
 
-.btn-primary:hover {
-    background-color: #4f46e5;
+.btn-outline {
+    background: transparent;
+    border-color: rgba(241, 227, 198, 0.6);
+    color: var(--accent-sand);
+    box-shadow: none;
 }
 
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: white;
+.btn-outline:hover {
+    background: rgba(241, 227, 198, 0.1);
 }
 
-.btn-secondary:hover {
-    background-color: #7c3aed;
+/* =============== Page d’accueil (home.html) =============== */
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.6fr);
+    gap: 2.5rem;
+    align-items: center;
 }
 
-/* Home Page */
-.home-hero {
-    text-align: center;
-    padding: 4rem 0;
+.hero-text h1 {
+    font-size: clamp(2.1rem, 3.1vw, 2.8rem);
+    line-height: 1.15;
+    margin-bottom: 0.8rem;
 }
 
-.home-hero h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
+.hero-text h1 span {
+    background: linear-gradient(120deg, var(--accent-gold), var(--accent-red));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
-.lead {
-    font-size: 1.25rem;
-    color: #6b7280;
-    margin-bottom: 2rem;
+.hero-text p {
+    color: var(--text-muted);
+    max-width: 34rem;
+    margin-bottom: 1.3rem;
 }
 
-.cta-buttons {
+.hero-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+}
+
+.hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* Carte “boussole” One Piece */
+.hero-card {
+    border-radius: var(--radius-lg);
+    background: radial-gradient(circle at top, rgba(245, 185, 23, 0.05), transparent 65%),
+                linear-gradient(145deg, #060b1c, #030716);
+    border: 1px solid var(--border-soft);
+    padding: 1.4rem 1.2rem;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card::before {
+    content: "Grand Line";
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(241, 227, 198, 0.45);
+}
+
+.hero-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.8rem;
+}
+
+.hero-card-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 30%;
+    border: 2px solid rgba(245, 185, 23, 0.8);
+    background: radial-gradient(circle at 30% 0, #fff 0, #f1e3c6 45%, #e7c06e 100%);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 1);
+}
+
+.hero-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.hero-card-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.hero-card-body {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+}
+
+.hero-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+}
+
+.hero-card-tag {
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.7rem;
+    border: 1px solid rgba(245, 185, 23, 0.4);
+    font-size: 0.75rem;
+    color: var(--accent-sand);
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* =============== Liste d’artistes (artists.html) =============== */
+
+.artists-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) minmax(0, 2.4fr);
+    gap: 2.2rem;
+    align-items: flex-start;
+}
+
+/* Sidebar filtres / recherche */
+
+.filters-card {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(145deg, #050b1f, #030715);
+    border: 1px solid var(--border-soft);
+    padding: 1.1rem 1rem 1.1rem;
+    box-shadow: var(--shadow-card);
+    position: sticky;
+    top: 1.2rem;
+}
+
+.filters-card h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+}
+
+.filters-section {
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.filters-section-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+/* Barre de recherche */
+
+.search-group {
+    position: relative;
+    margin-bottom: 0.7rem;
+}
+
+.search-group input[type="text"] {
+    width: 100%;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    padding: 0.55rem 2.2rem 0.55rem 0.9rem;
+    background: rgba(5, 11, 31, 0.9);
+    color: var(--text-main);
+    font-size: 0.86rem;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+                background var(--transition-fast), transform var(--transition-fast);
+}
+
+.search-group input[type="text"]::placeholder {
+    color: rgba(148, 163, 184, 0.7);
+}
+
+.search-group input[type="text"]:focus {
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 1px rgba(245, 185, 23, 0.5);
+    background: rgba(8, 20, 46, 0.95);
+    transform: translateY(-0.5px);
+}
+
+.search-icon {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: rgba(148, 163, 184, 0.9);
+}
+
+/* Inputs filtres */
+
+.filter-row {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.55rem;
+}
+
+.filter-row input,
+.filter-row select {
+    flex: 1;
+}
+
+input,
+select {
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    padding: 0.45rem 0.6rem;
+    background: rgba(3, 8, 23, 0.9);
+    color: var(--text-main);
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast),
+                box-shadow var(--transition-fast);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 1px rgba(27, 111, 168, 0.6);
+    background: rgba(10, 20, 46, 0.95);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+
+/* Liste / grille d’artistes */
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 1.1rem;
+}
+
+.artist-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(145deg, #050b1f, #020614);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(15, 23, 42, 0.9);
+    cursor: pointer;
+    transition: transform var(--transition-med), box-shadow var(--transition-med),
+                border-color var(--transition-med), filter var(--transition-med);
+}
+
+.artist-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.9);
+    border-color: rgba(245, 185, 23, 0.7);
+    filter: brightness(1.05);
+}
+
+/* Petit ruban "Wanted" type One Piece */
+.artist-tag-wanted {
+    position: absolute;
+    top: 0.65rem;
+    left: -1.5rem;
+    background: linear-gradient(135deg, #f1e3c6, #d9c49a);
+    color: #3b2b1a;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 1.8rem;
+    transform: rotate(-13deg);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.6);
+    letter-spacing: 0.12em;
+}
+
+.artist-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    height: 170px;
+}
+
+.artist-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s ease-out;
+}
+
+.artist-card:hover .artist-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.artist-year-pill {
+    position: absolute;
+    bottom: 0.6rem;
+    right: 0.6rem;
+    border-radius: var(--radius-pill);
+    background: rgba(3, 7, 18, 0.75);
+    border: 1px solid rgba(245, 185, 23, 0.7);
+    padding: 0.18rem 0.55rem;
+    font-size: 0.7rem;
+    color: var(--accent-sand);
+}
+
+.artist-content {
+    padding: 0.75rem 0.8rem 0.85rem;
+}
+
+.artist-name {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    font-size: 0.97rem;
+}
+
+.artist-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.6rem;
+}
+
+.artist-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* =============== Détails artiste (artists_details.html) =============== */
+
+.artist-details-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 2.3fr);
+    gap: 2.1rem;
+    align-items: flex-start;
+}
+
+.artist-details-card {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(145deg, #050b1f, #030715);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-card);
+    padding: 1.2rem 1.2rem 1.1rem;
+}
+
+.artist-details-header {
+    display: flex;
+    align-items: flex-start;
     gap: 1rem;
+    margin-bottom: 0.9rem;
+}
+
+.artist-details-image {
+    width: 150px;
+    border-radius: 22%;
+    overflow: hidden;
+    border: 2px solid rgba(245, 185, 23, 0.7);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.9);
+}
+
+.artist-details-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.artist-details-title h1 {
+    font-size: 1.5rem;
+}
+
+.artist-details-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+}
+
+.badge {
+    border-radius: var(--radius-pill);
+    padding: 0.18rem 0.7rem;
+    font-size: 0.74rem;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    color: var(--text-muted);
+}
+
+.badge-primary {
+    border-color: rgba(245, 185, 23, 0.7);
+    color: var(--accent-sand);
+}
+
+.artist-details-section {
+    margin-top: 0.7rem;
+}
+
+.artist-details-section h2 {
+    font-size: 0.96rem;
+    margin-bottom: 0.4rem;
+}
+
+.artist-details-section ul {
+    list-style: none;
+    padding-left: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.artist-details-section li + li {
+    margin-top: 0.15rem;
+}
+
+/* Liste concerts / dates */
+
+.concerts-card {
+    border-radius: var(--radius-lg);
+    background: linear-gradient(145deg, #030716, #050b1f);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-card);
+    padding: 1.1rem 1rem;
+}
+
+.concerts-list {
+    max-height: 360px;
+    overflow: auto;
+    padding-right: 0.3rem;
+}
+
+.concert-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.7rem;
+    padding: 0.5rem 0.3rem;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.4);
+    font-size: 0.84rem;
+    color: var(--text-muted);
+}
+
+.concert-item:last-child {
+    border-bottom: none;
+}
+
+/* =============== Carte (map.html) =============== */
+
+.map-container {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #050b1f;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-card);
+}
+
+.map-container iframe,
+.map-container #map {
+    width: 100%;
+    height: 450px;
+    border: none;
+}
+
+/* =============== Pages d’erreur (error.html) =============== */
+
+.error-page {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-/* Footer */
-footer {
-    background-color: var(--card-bg);
-    padding: 2rem 0;
-    margin-top: auto;
+.error-card {
+    max-width: 420px;
     text-align: center;
-    color: #6b7280;
-    border-top: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.7rem 1.4rem 1.5rem;
+    background: radial-gradient(circle at top, rgba(230, 57, 70, 0.12), transparent 60%),
+                linear-gradient(145deg, #050b1f, #030615);
+    border: 1px solid rgba(239, 68, 68, 0.7);
+    box-shadow: var(--shadow-card);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+.error-code {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.4rem;
+    background: linear-gradient(120deg, #f5b917, #e63946);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.error-message {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+/* =============== Footer =============== */
+
+footer {
+    padding: 0.8rem 0 1.6rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* =============== Responsif =============== */
+
+@media (max-width: 960px) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .artists-layout,
+    .artist-details-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .filters-card {
+        position: static;
+        order: -1;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+        gap: 0.5rem 0.8rem;
+    }
+
     .nav-links {
-        flex-direction: column;
-        gap: 1rem;
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    body > header,
+    body > main,
+    body > footer {
+        padding: 0 1rem;
     }
 
-    .home-hero h1 {
-        font-size: 2rem;
+    .navbar {
+        padding: 0.6rem 0.9rem;
     }
 
-    .cta-buttons {
+    .hero-text h1 {
+        font-size: 1.9rem;
+    }
+
+    .artists-grid {
+        grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    }
+
+    .artist-details-header {
         flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .artist-details-image {
+        width: 130px;
+    }
+
+    .filters-card {
+        padding: 0.9rem 0.9rem;
     }
 }
