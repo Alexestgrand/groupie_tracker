@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"bytes" // Ne pas oublier cet import
 	"html/template"
 	"log"
 	"net/http"
 )
 
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	// Parser les templates avec gestion d'erreur
+	// 1. Parser les templates
 	templates, err := template.ParseFiles(
 		"templates/layout.html",
 		"templates/"+tmpl,
@@ -18,10 +19,16 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 		return
 	}
 
-	// Exécuter le template avec gestion d'erreur
-	if err := templates.ExecuteTemplate(w, "layout.html", data); err != nil {
+	// 2. Utiliser un buffer pour préparer le rendu en mémoire
+	buf := new(bytes.Buffer)
+	if err := templates.ExecuteTemplate(buf, "layout.html", data); err != nil {
 		log.Printf("Erreur lors du rendu du template %s: %v", tmpl, err)
+		// Ici, rien n'a été envoyé à 'w', donc on peut envoyer une erreur propre
 		http.Error(w, "Erreur interne du serveur - Erreur de rendu", http.StatusInternalServerError)
 		return
 	}
+
+	// 3. Si tout est ok, envoyer le contenu du buffer à la réponse
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	buf.WriteTo(w)
 }
