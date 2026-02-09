@@ -1,54 +1,78 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
-	"groupie-tracker-ng/models"
 	"groupie-tracker-ng/utils"
 )
 
-// ArtistsHandler gère la liste des artistes
+// ArtistsHandler gère la liste des artistes avec filtres et recherche
 func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode HTTP est GET
 	if r.Method != http.MethodGet {
 		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
 		return
 	}
 
-	// Récupérer les artistes depuis l'API Spotify
-	spotifyArtists, err := spotifyClient.FetchPopularArtists()
+	// Récupérer les artistes depuis l'API
+	artists, err := apiClient.FetchArtists()
 	if err != nil {
 		utils.HandleError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	// Vérifier qu'on a des artistes
-	if len(spotifyArtists) == 0 {
-		utils.RenderError(w, http.StatusNotFound, "Aucun artiste trouvé")
-		return
+	// Appliquer la recherche si présente
+	query := r.URL.Query().Get("q")
+	if query != "" && len(query) >= 1 {
+		artists = utils.SearchArtists(artists, query)
 	}
 
-	// Convertir les artistes Spotify en format Artist
-	artists := make([]models.Artist, len(spotifyArtists))
-	for i, sa := range spotifyArtists {
-		imageURL := ""
-		if len(sa.Images) > 0 {
-			imageURL = sa.Images[0].URL
-		}
-		artists[i] = models.Artist{
-			ID:         sa.ID,
-			Name:       sa.Name,
-			Image:      imageURL,
-			Genres:     sa.Genres,
-			SpotifyURL: fmt.Sprintf("https://open.spotify.com/artist/%s", sa.ID),
-		}
+	// Appliquer les filtres (adaptés pour Spotify)
+	filterOptions := utils.ParseFilterOptions(r.URL.Query())
+	
+	// Note: Spotify ne fournit pas de lieux de concerts, donc on ignore ce filtre
+	// Appliquer les autres filtres (année, membres, etc.)
+	artists = utils.FilterArtists(artists, filterOptions)
+
+	// Spotify ne fournit pas de lieux, donc liste vide
+	locationsList := []string{}
+
+	// Préparer les données pour les filtres
+	minYear := ""
+	maxYear := ""
+	if filterOptions.MinYear > 0 {
+		minYear = strconv.Itoa(filterOptions.MinYear)
+	}
+	if filterOptions.MaxYear > 0 {
+		maxYear = strconv.Itoa(filterOptions.MaxYear)
+	}
+
+	// Vérifier quels nombres de membres sont sélectionnés
+	memberSelected := make(map[int]bool)
+	for _, mc := range filterOptions.MemberCount {
+		memberSelected[mc] = true
+	}
+
+	// Vérifier quels lieux sont sélectionnés
+	locationSelected := make(map[string]bool)
+	for _, loc := range filterOptions.Locations {
+		locationSelected[loc] = true
 	}
 
 	data := map[string]interface{}{
-		"Title":   "Liste des Artistes",
-		"Artists": artists,
+		"Title":           "Liste des Artistes",
+		"Artists":         artists,
+		"Query":           query,
+		"Locations":       locationsList,
+		"MinYear":         minYear,
+		"MaxYear":         maxYear,
+		"Member1":         memberSelected[1],
+		"Member2":         memberSelected[2],
+		"Member3":         memberSelected[3],
+		"Member4":         memberSelected[4],
+		"Member5":         memberSelected[5],
+		"LocationSelected": locationSelected,
 	}
 
 	renderTemplate(w, "artists.html", data)
@@ -56,62 +80,31 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ArtistDetailHandler gère la page de détails d'un artiste
 func ArtistDetailHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode HTTP est GET
 	if r.Method != http.MethodGet {
 		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
 		return
 	}
 
-	// Extraire l'ID Spotify de l'URL (format: /artist/4uLU6hMCjMI75M1A2tKUQC)
-	artistID := strings.TrimPrefix(r.URL.Path, "/artist/")
-
+	// Extraire l'ID de l'URL (format: /artist/1)
+	artistIDStr := strings.TrimPrefix(r.URL.Path, "/artist/")
+	
 	// Valider l'ID
-	if artistID == "" {
-		utils.RenderError(w, http.StatusBadRequest, "ID d'artiste invalide ou manquant")
+	artistID, err := strconv.Atoi(artistIDStr)
+	if err != nil || artistID <= 0 {
+		utils.RenderError(w, http.StatusBadRequest, "ID d'artiste invalide")
 		return
 	}
 
-	// Valider le format de l'ID Spotify (doit contenir des caractères alphanumériques)
-	if len(artistID) < 10 || len(artistID) > 30 {
-		utils.RenderError(w, http.StatusBadRequest, "Format d'ID d'artiste invalide")
-		return
-	}
-
-	// Récupérer les détails complets de l'artiste depuis l'API Spotify
-	fullArtist, err := spotifyClient.GetArtistByID(artistID)
+	// Récupérer les détails complets de l'artiste
+	detail, err := apiClient.FetchArtistDetail(artistID)
 	if err != nil {
-		utils.RenderError(w, http.StatusNotFound, "Artiste non trouvé sur Spotify")
+		utils.RenderError(w, http.StatusNotFound, "Artiste non trouvé")
 		return
-	}
-
-	// Construire l'objet ArtistDetail
-	imageURL := ""
-	if len(fullArtist.Images) > 0 {
-		imageURL = fullArtist.Images[0].URL
-	}
-
-	detail := models.ArtistDetail{
-		Artist: models.Artist{
-			ID:         fullArtist.ID,
-			Name:       fullArtist.Name,
-			Image:      imageURL,
-			Genres:     fullArtist.Genres,
-			Popularity: fullArtist.Popularity,
-			SpotifyURL: fullArtist.ExternalURLs.Spotify,
-		},
-		Followers: fullArtist.Followers.Total,
-		SpotifyInfo: map[string]interface{}{
-			"spotify_id":  fullArtist.ID,
-			"genres":      fullArtist.Genres,
-			"popularity":  fullArtist.Popularity,
-			"followers":   fullArtist.Followers.Total,
-			"spotify_url": fullArtist.ExternalURLs.Spotify,
-		},
 	}
 
 	data := map[string]interface{}{
 		"Title":  "Détails de " + detail.Name,
-		"Artist": detail, // ArtistDetail avec Artist embed
+		"Artist": detail,
 	}
 
 	renderTemplate(w, "artists_details.html", data)

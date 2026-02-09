@@ -1,9 +1,58 @@
 {{define "content"}}
-<div class="map-page">
-    <h1>Carte Interactive</h1>
-    <p>Fonctionnalité en cours de développement</p>
+<div class="container">
+    <h1 class="fade-in-on-scroll" style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--text-primary); margin-bottom: 2rem; text-align: center; font-weight: 700;">🗺️ Carte Interactive</h1>
+
+    <div class="fade-in-on-scroll" style="background: var(--bg-secondary); backdrop-filter: blur(20px); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); margin-bottom: 2rem;">
+        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+            Explorez les lieux de concerts et les dates associées. Cliquez sur un lieu pour voir tous les concerts à cet endroit.
+        </p>
+        
+        {{if .Locations}}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {{range .Locations}}
+            <div class="location-card" style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); transition: var(--transition);">
+                <h3 style="color: var(--text-primary); font-size: 1.2rem; margin-bottom: 1rem; font-weight: 600;">
+                    📍 <a href="/location/{{.Location}}" style="color: var(--text-primary); text-decoration: none; border-bottom: 2px solid transparent; transition: var(--transition);">{{.Location}}</a>
+                </h3>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">🎵 Artistes :</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        {{range .Artists}}
+                            <span class="genre-tag" style="font-size: 0.8rem;">{{.}}</span>
+                        {{end}}
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">📅 Dates :</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        {{range .Dates}}
+                            <span class="genre-tag" style="font-size: 0.75rem;">{{.}}</span>
+                        {{end}}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <a href="/location/{{.Location}}" class="btn-details" style="font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-block; width: 100%; text-align: center;">Voir tous les concerts à {{.Location}}</a>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <div style="text-align: center; padding: 3rem; background: var(--bg-tertiary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1rem;">
+                ℹ️ Les informations sur les lieux de concerts ne sont pas disponibles via l'API Spotify.
+            </p>
+            <p style="color: var(--text-tertiary); font-size: 0.9rem;">
+                L'API Spotify fournit des informations sur les artistes, leurs genres et leur popularité, mais pas sur les concerts.
+            </p>
+        </div>
+        {{end}}
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    </div>
 </div>
 {{end}}
-
-
-

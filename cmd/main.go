@@ -17,6 +17,7 @@ func main() {
 	http.HandleFunc("/suggestions", handlers.SuggestionsHandler)
 	http.HandleFunc("/map", handlers.MapHandler)
 	http.HandleFunc("/location/", handlers.LocationHandler)
+	http.HandleFunc("/gims", handlers.GimsHandler)
 
 	port := ":8000"
 	log.Printf("🚀 Serveur démarré sur http://localhost%s", port)

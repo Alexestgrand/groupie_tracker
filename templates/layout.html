@@ -1,21 +1,27 @@
+{{define "layout"}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Groupie Tracker</title>
+    <meta name="description" content="Découvrez et explorez les artistes et leurs concerts à travers le monde avec Groupie Tracker">
+    <title>{{if .Title}}{{.Title}} - {{end}}Groupie Tracker</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <div class="logo">GROUPIE TRACKER</div>
+            <a href="/" class="logo">Groupie Tracker</a>
             <ul class="nav-links">
                 <li><a href="/">Accueil</a></li>
                 <li><a href="/artists">Artistes</a></li>
                 <li><a href="/map">Carte</a></li>
             </ul>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <span id="theme-icon">🌙</span>
+            </button>
         </nav>
     </header>
 
@@ -24,9 +30,12 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 Groupie Tracker - Projet 01</p>
+        <div class="container">
+            <p>&copy; 2024 Groupie Tracker - Découvrez la musique autrement</p>
+        </div>
     </footer>
 
     <script src="/static/js/script.js"></script>
 </body>
 </html>
+{{end}}
