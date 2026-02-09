@@ -21,7 +21,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 
 	// 2. Utiliser un buffer pour préparer le rendu en mémoire
 	buf := new(bytes.Buffer)
-	if err := templates.ExecuteTemplate(buf, "layout", data); err != nil {
+	if err := templates.ExecuteTemplate(buf, "layout.html", data); err != nil {
 		log.Printf("Erreur lors du rendu du template %s: %v", tmpl, err)
 		// Ici, rien n'a été envoyé à 'w', donc on peut envoyer une erreur propre
 		http.Error(w, "Erreur interne du serveur - Erreur de rendu", http.StatusInternalServerError)
