@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"groupie-tracker-ng/models"
 	"groupie-tracker-ng/utils"
 )
 
@@ -15,11 +16,13 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Récupérer les artistes depuis l'API
+	// Récupérer les artistes depuis l'API Spotify
 	artists, err := apiClient.FetchArtists()
+	apiError := ""
 	if err != nil {
-		utils.HandleError(w, err, http.StatusInternalServerError)
-		return
+		// Ne pas faire planter la page : afficher une liste vide et un message
+		artists = []models.Artist{}
+		apiError = err.Error()
 	}
 
 	// Appliquer la recherche si présente
@@ -73,6 +76,7 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 		"Member4":         memberSelected[4],
 		"Member5":         memberSelected[5],
 		"LocationSelected": locationSelected,
+		"APIError":        apiError,
 	}
 
 	renderTemplate(w, "artists.html", data)

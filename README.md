@@ -1,77 +1,62 @@
-# Groupie Tracker - Version Spotify
+# Groupie Tracker
 
-Application web permettant de visualiser, filtrer et explorer les données d'artistes depuis l'API Spotify.
+Application web pour visualiser, filtrer et explorer des artistes via l’**API Spotify**.  
+(Utilisation de l’API Spotify autorisée pour ce projet.)
 
-## Configuration
+## Objectif
 
-### Credentials Spotify
+Proposer une interface claire pour parcourir des artistes (liste, recherche, filtres, détail) avec une expérience utilisateur soignée (thème clair/sombre, responsive).
 
-Pour utiliser l'API Spotify, vous devez configurer vos credentials :
+## Lancer le projet
 
-1. Créez une application sur [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-2. Récupérez votre `Client ID` et `Client Secret`
-3. Configurez les variables d'environnement :
+### 1. Variables d’environnement Spotify
+
+Créez une application sur [Spotify for Developers](https://developer.spotify.com/dashboard), récupérez le **Client ID** et le **Client Secret**, puis :
 
 ```bash
 export SPOTIFY_CLIENT_ID="votre_client_id"
 export SPOTIFY_CLIENT_SECRET="votre_client_secret"
 ```
 
-Ou modifiez directement le fichier `api/spotify.go` ligne 88-91 pour mettre vos credentials.
-
-## Installation
+### 2. Installation et exécution
 
 ```bash
 go mod download
+go run ./cmd/main.go
 ```
 
-## Lancement
+Le serveur écoute sur **http://localhost:8000**.
 
-```bash
-go run cmd/main.go
-```
+## Routes principales
 
-Le serveur sera accessible sur `http://localhost:8000`
+| Route | Rôle |
+|-------|------|
+| `GET /` | Page d’accueil, lien vers la liste des artistes |
+| `GET /artists` | Liste des artistes (avec recherche `?q=`, filtres) |
+| `GET /artist/:id` | Détail d’un artiste (image, nom, genres, lien Spotify) |
+| `GET /search?q=...` | Recherche par nom (redirige vers liste filtrée) |
+| `GET /suggestions?q=...` | Suggestions JSON pour l’autocomplétion (JS) |
+| `GET /map` | Carte / lieux (données limitées avec Spotify) |
+| `GET /location/:lieu` | Concerts à un lieu (données limitées avec Spotify) |
+| `GET /gims` | Redirection vers la fiche de l’artiste GIMS |
 
 ## Fonctionnalités
 
-- ✅ Liste des artistes populaires depuis Spotify
-- ✅ Recherche d'artistes
-- ✅ Suggestions de recherche en temps réel
-- ✅ Page de détails d'artiste avec genres, popularité, followers
-- ✅ Filtres par genres (via recherche)
-- ✅ Design moderne avec palette marron/beige
+- **Obligatoires**  
+  - Page d’accueil, liste d’artistes (image, nom, lien détail), page détail artiste  
+  - Barre de recherche (requête HTTP) + suggestions en JS  
+  - Filtres (année min/max, nombre de membres)  
+  - Carte et page par lieu (structure en place)  
+  - Clic sur un lieu → requête serveur → page concerts à ce lieu  
+  - Gestion d’erreurs (404, 400, 500), route `/gims`  
 
-## Limitations
+- **Bonus**  
+  - Thème sombre (toggle + préférence stockée)
 
-L'API Spotify ne fournit pas :
-- ❌ Lieux de concerts
-- ❌ Dates de concerts
-- ❌ Membres des groupes
-- ❌ Année de création
-- ❌ Premier album
+## Limitations (API Spotify)
 
-Ces fonctionnalités sont désactivées ou affichent un message d'information.
+L’API Spotify ne fournit pas : lieux/dates de concerts, membres de groupe, année de création, premier album. Ces champs sont vides ou désactivés ; la carte et la page par lieu restent en place pour une éventuelle autre source de données.
 
-## Structure du projet
+## Lien GitHub
 
-```
-groupie-tracker-ng/
-├── api/
-│   └── spotify.go          # Client API Spotify
-├── handlers/               # Gestionnaires HTTP
-├── models/                 # Modèles de données
-├── templates/              # Templates HTML
-├── static/                 # Fichiers statiques (CSS, JS)
-├── utils/                  # Utilitaires
-└── cmd/
-    └── main.go            # Point d'entrée
-```
-
-## Technologies
-
-- Go (net/http, html/template)
-- HTML/CSS/JavaScript (minimal, uniquement pour suggestions)
-- API Spotify
-
-
+(À compléter si le dépôt est sur GitHub.)

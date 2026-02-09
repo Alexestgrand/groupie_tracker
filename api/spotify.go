@@ -387,17 +387,34 @@ func (s *SpotifyClient) GetArtistByID(artistID string) (*SpotifyArtistFull, erro
 
 // FetchPopularArtists récupère une liste d'artistes populaires
 func (s *SpotifyClient) FetchPopularArtists() ([]SpotifyArtist, error) {
-	// Rechercher des artistes populaires avec différentes requêtes
-	queries := []string{"rock", "pop", "rap", "jazz", "electronic", "classical", "country", "reggae", "indie", "metal"}
+	// Vérifier l'authentification une seule fois
+	if err := s.authenticate(); err != nil {
+		return nil, fmt.Errorf("Spotify: %w", err)
+	}
+
+	queries := []string{"rock", "pop", "rap", "jazz", "electronic", "indie", "metal"}
 	var allArtists []SpotifyArtist
 	seen := make(map[string]bool)
 
 	for _, query := range queries {
-		artists, err := s.SearchArtists(query, 10)
+		artists, err := s.SearchArtists(query, 15)
 		if err != nil {
-			continue // Ignorer les erreurs et continuer
+			continue
 		}
+		for _, artist := range artists {
+			if !seen[artist.ID] {
+				allArtists = append(allArtists, artist)
+				seen[artist.ID] = true
+			}
+		}
+	}
 
+	// Si aucune requête n'a rien renvoyé, une dernière tentative large
+	if len(allArtists) == 0 {
+		artists, err := s.SearchArtists("artist", 50)
+		if err != nil {
+			return nil, fmt.Errorf("aucun artiste récupéré: %w", err)
+		}
 		for _, artist := range artists {
 			if !seen[artist.ID] {
 				allArtists = append(allArtists, artist)

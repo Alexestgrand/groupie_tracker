@@ -6,7 +6,7 @@ groupie-tracker-ng/
 ├── cmd/
 │   └── main.go                 # Point d'entrée de l'application
 ├── api/
-│   └── client.go               # Client HTTP pour consommer l'API externe
+│   └── spotify.go              # Client API Spotify (source des données artistes)
 ├── models/
 │   └── artist.go               # Structures de données (Artist, Location, Date, Relation)
 ├── handlers/
@@ -66,18 +66,14 @@ groupie-tracker-ng/
 /gims                 → handlers.GimsHandler
 ```
 
-### 2. `api/client.go` - Client API
+### 2. `api/spotify.go` - Client API
 
-**Responsabilité** : Communication avec l'API externe Groupie Trackers
+**Responsabilité** : Communication avec l’API Spotify (source des données artistes, autorisée pour ce projet).
 
-**À implémenter** :
-- Structure `Client` avec `http.Client` et timeout
-- Fonction `NewClient()` pour créer une instance
-- Méthodes pour chaque endpoint :
-  - `FetchArtists()` → `/api/artists`
-  - `FetchLocations()` → `/api/locations`
-  - `FetchDates()` → `/api/dates`
-  - `FetchRelations()` → `/api/relation`
+**Implémenté** :
+- Structure `SpotifyClient` (credentials, token, http.Client)
+- `NewClient()` lit `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`
+- Méthodes : `FetchArtists()`, `FetchArtistDetail()`, `FindArtistByName()`, `FetchRelations()` (vide), etc.
   - `FetchArtistDetail(id)` → combine toutes les données pour un artiste
 
 **Points importants** :

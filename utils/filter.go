@@ -60,16 +60,16 @@ func FilterArtists(artists []models.Artist, options models.FilterOptions) []mode
 	filtered := make([]models.Artist, 0)
 
 	for _, artist := range artists {
-		// Filtrer par année de création
-		if options.MinYear > 0 && artist.CreationDate < options.MinYear {
+		// Filtrer par année de création (ignorer si non fournie, ex. API Spotify)
+		if options.MinYear > 0 && artist.CreationDate != 0 && artist.CreationDate < options.MinYear {
 			continue
 		}
-		if options.MaxYear > 0 && artist.CreationDate > options.MaxYear {
+		if options.MaxYear > 0 && artist.CreationDate != 0 && artist.CreationDate > options.MaxYear {
 			continue
 		}
 
-		// Filtrer par nombre de membres
-		if len(options.MemberCount) > 0 {
+		// Filtrer par nombre de membres (ignorer si non fourni, ex. API Spotify)
+		if len(options.MemberCount) > 0 && len(artist.Members) > 0 {
 			memberCount := len(artist.Members)
 			found := false
 			for _, mc := range options.MemberCount {
