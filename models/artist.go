@@ -1,6 +1,6 @@
 package models
 
-// Artist représente un artiste de l'API Groupie Trackers
+// Artist représente un artiste (API Groupie ou Spotify)
 type Artist struct {
 	ID           int      `json:"id"`
 	Image        string   `json:"image"`
@@ -8,9 +8,14 @@ type Artist struct {
 	Members      []string `json:"members"`
 	CreationDate int      `json:"creationDate"`
 	FirstAlbum   string   `json:"firstAlbum"`
-	Locations    string   `json:"locations"`    // URL de l'endpoint
-	ConcertDates string   `json:"concertDates"` // URL de l'endpoint
-	Relations    string   `json:"relations"`    // URL de l'endpoint
+	Locations    string   `json:"locations"`
+	ConcertDates string   `json:"concertDates"`
+	Relations    string   `json:"relations"`
+	// Champs optionnels (ex. API Spotify)
+	SpotifyURL string   `json:"-"`
+	Genres     []string `json:"-"`
+	Popularity int      `json:"-"`
+	Followers  int      `json:"-"`
 }
 
 // Location représente les lieux de concerts d'un artiste
@@ -35,11 +40,11 @@ type Relation struct {
 // ArtistDetail représente un artiste avec toutes ses données complètes
 type ArtistDetail struct {
 	Artist
-	ConcertDates []string            `json:"concertDates"`  // Dates de concerts
-	Locations    []string            `json:"locations"`     // Lieux de concerts
-	Relations    map[string][]string `json:"relations"`     // Relations dates-lieux
-	BirthDates   map[string]string  `json:"birthDates"`    // Dates de naissance des membres (bonus)
-	DeathDates   map[string]string  `json:"deathDates"`    // Dates de mort des membres (bonus)
+	ConcertDates []string            `json:"concertDates"` // Dates de concerts
+	Locations    []string            `json:"locations"`    // Lieux de concerts
+	Relations    map[string][]string `json:"relations"`    // Relations dates-lieux
+	BirthDates   map[string]string   `json:"birthDates"`   // Dates de naissance des membres (bonus)
+	DeathDates   map[string]string   `json:"deathDates"`   // Dates de mort des membres (bonus)
 }
 
 // FilterOptions représente les options de filtrage

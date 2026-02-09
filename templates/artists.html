@@ -1,106 +1,89 @@
 {{define "content"}}
 <div class="container">
-    <h1 class="fade-in-on-scroll" style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--text-primary); margin-bottom: 2rem; text-align: center; font-weight: 700;">{{.Title}}</h1>
+    <h1 class="page-title">{{.Title}}</h1>
 
-    <section class="controls-section fade-in-on-scroll">
+    <section class="controls-section">
         <div class="search-container">
-            <form action="/search" method="GET" autocomplete="off">
-                <input type="text" id="search-input" name="q" class="search-input" 
-                       placeholder="🔍 Rechercher un artiste ou un membre..." 
+            <form action="/search" method="GET" autocomplete="off" class="search-form">
+                <input type="text" id="search-input" name="q" class="search-input"
+                       placeholder="Rechercher un artiste..."
                        value="{{if .Query}}{{.Query}}{{end}}">
                 <div id="suggestions-box" class="suggestions-box"></div>
-                <button type="submit" class="btn-search" style="margin-top: 1rem; width: 100%;">Rechercher</button>
+                <button type="submit" class="btn-search">Rechercher</button>
             </form>
         </div>
-        
-        <form action="/artists" method="GET" class="filter-form" style="margin-top: 2rem;">
-            <div class="filter-group">
-                <label>Année de création (min)</label>
-                <input type="number" name="minYear" placeholder="Ex: 1950" value="{{.MinYear}}" min="1900" max="2024">
-            </div>
-            
-            <div class="filter-group">
-                <label>Année de création (max)</label>
-                <input type="number" name="maxYear" placeholder="Ex: 2000" value="{{.MaxYear}}" min="1900" max="2024">
-            </div>
-            
-            <div class="filter-group">
-                <label>Nombre de membres</label>
-                <select name="memberCount" multiple style="min-height: 100px;">
-                    <option value="1" {{if .Member1}}selected{{end}}>1 membre</option>
-                    <option value="2" {{if .Member2}}selected{{end}}>2 membres</option>
-                    <option value="3" {{if .Member3}}selected{{end}}>3 membres</option>
-                    <option value="4" {{if .Member4}}selected{{end}}>4 membres</option>
-                    <option value="5" {{if .Member5}}selected{{end}}>5+ membres</option>
-                </select>
-            </div>
-            
-            {{if .Locations}}
-            <div class="filter-group">
-                <label>Lieux de concerts</label>
-                <select name="location" multiple style="min-height: 150px;">
-                    {{range .Locations}}
-                    <option value="{{.}}" {{if index $.LocationSelected .}}selected{{end}}>{{.}}</option>
+
+        <div class="filters-wrapper">
+            <p class="filters-label">Filtrer les résultats</p>
+            <form action="{{if .Query}}/search{{else}}/artists{{end}}" method="GET" class="filter-form" id="filter-form">
+                {{if .Query}}<input type="hidden" name="q" value="{{.Query}}">{{end}}
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="minYear">Année min</label>
+                        <input type="number" id="minYear" name="minYear" placeholder="ex. 1990" value="{{.MinYear}}" min="1900" max="2030">
+                    </div>
+                    <div class="filter-group">
+                        <label for="maxYear">Année max</label>
+                        <input type="number" id="maxYear" name="maxYear" placeholder="ex. 2020" value="{{.MaxYear}}" min="1900" max="2030">
+                    </div>
+                    <div class="filter-group">
+                        <label for="memberCount">Membres</label>
+                        <select id="memberCount" name="memberCount" multiple class="filter-select">
+                            <option value="1" {{if .Member1}}selected{{end}}>1</option>
+                            <option value="2" {{if .Member2}}selected{{end}}>2</option>
+                            <option value="3" {{if .Member3}}selected{{end}}>3</option>
+                            <option value="4" {{if .Member4}}selected{{end}}>4</option>
+                            <option value="5" {{if .Member5}}selected{{end}}>5+</option>
+                        </select>
+                    </div>
+                    {{if .Locations}}
+                    <div class="filter-group">
+                        <label>Lieux</label>
+                        <select name="location" multiple class="filter-select">
+                            {{range .Locations}}
+                            <option value="{{.}}" {{if index $.LocationSelected .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
                     {{end}}
-                </select>
-            </div>
-            {{end}}
-            
-            <div class="filter-group">
-                <button type="submit" class="btn-filter">🔍 Filtrer</button>
-                <a href="/artists" class="btn-back" style="margin-top: 0.5rem; display: block; text-align: center;">Réinitialiser</a>
-            </div>
-        </form>
-        
-        <div style="margin-top: 1.5rem; text-align: center;">
-            <a href="/artists" class="btn-filter">✨ Voir tous les artistes</a>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter">Appliquer</button>
+                        <a href="/artists" class="btn-back">Tout effacer</a>
+                    </div>
+                </div>
+            </form>
         </div>
     </section>
 
     {{if .APIError}}
-    <div class="controls-section" style="margin-bottom: 2rem;">
-        <p style="color: var(--text-secondary); text-align: center; margin-bottom: 0.5rem;">⚠️ Impossible de charger les artistes.</p>
-        <p style="font-size: 0.9rem; color: var(--text-tertiary); text-align: center;">Vérifiez <strong>SPOTIFY_CLIENT_ID</strong> et <strong>SPOTIFY_CLIENT_SECRET</strong> (variables d'environnement ou api/spotify.go).</p>
+    <div class="controls-section api-error-msg">
+        <p class="api-error-title">Impossible de charger les artistes</p>
+        <p class="api-error-desc">Vérifiez <strong>SPOTIFY_CLIENT_ID</strong> et <strong>SPOTIFY_CLIENT_SECRET</strong>.</p>
     </div>
     {{end}}
+
     <div class="artists-grid">
         {{if .Artists}}
             {{range .Artists}}
-            <article class="artist-card fade-in-on-scroll">
+            <article class="artist-card">
                 {{if .Image}}
-                    <img src="{{.Image}}" alt="{{.Name}}" loading="lazy">
+                <img src="{{.Image}}" alt="{{.Name}}" loading="lazy">
                 {{else}}
-                    <div style="width: 100%; height: 280px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-                        Pas d'image
-                    </div>
+                <div class="artist-card-noimg">🎵</div>
                 {{end}}
-                
                 <h2 class="artist-name">{{.Name}}</h2>
-                
-                <div style="padding: 0 1rem; margin-bottom: 0.5rem;">
-                    {{if .CreationDate}}
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">
-                        <strong>Année de création:</strong> {{.CreationDate}}
-                    </p>
-                    {{end}}
-                    {{if .Members}}
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">
-                        <strong>Membres:</strong> {{len .Members}}
-                    </p>
-                    {{end}}
-                    {{if .FirstAlbum}}
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.5rem 0;">
-                        <strong>Premier album:</strong> {{.FirstAlbum}}
-                    </p>
-                    {{end}}
+                <div class="artist-card-meta">
+                    {{if .CreationDate}}<span>Création {{.CreationDate}}</span>{{end}}
+                    {{if .Members}}<span>{{len .Members}} membre(s)</span>{{end}}
+                    {{if .FirstAlbum}}<span>Album {{.FirstAlbum}}</span>{{end}}
                 </div>
-
-                <a href="/artist/{{.ID}}" class="btn-details">Voir détails</a>
+                <a href="/artist/{{.ID}}" class="btn-details">Voir la fiche</a>
             </article>
             {{end}}
         {{else}}
-            <div class="text-center" style="grid-column: 1 / -1; padding: 3rem; background: var(--bg-secondary); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
-                <p style="font-size: 1.2rem; color: var(--text-secondary);">Aucun artiste trouvé. Essayez une autre recherche ou modifiez les filtres !</p>
+            <div class="artists-empty">
+                <p>Aucun artiste trouvé.</p>
+                <p>Modifiez la recherche ou les filtres, ou <a href="/artists">affichez tous les artistes</a>.</p>
             </div>
         {{end}}
     </div>

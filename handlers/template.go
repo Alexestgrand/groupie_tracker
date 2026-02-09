@@ -1,15 +1,20 @@
 package handlers
 
 import (
-	"bytes" // Ne pas oublier cet import
+	"bytes"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
+var templateFuncs = template.FuncMap{
+	"join": strings.Join,
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	// 1. Parser les templates
-	templates, err := template.ParseFiles(
+	// 1. Parser les templates (avec join pour les listes)
+	templates, err := template.New("").Funcs(templateFuncs).ParseFiles(
 		"templates/layout.html",
 		"templates/"+tmpl,
 	)

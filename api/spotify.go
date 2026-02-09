@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"groupie-tracker-ng/models"
@@ -19,12 +20,18 @@ const (
 	SpotifyAPIURL  = "https://api.spotify.com/v1"
 )
 
+const artistsCacheTTL = 5 * time.Minute
+
 type SpotifyClient struct {
 	clientID     string
 	clientSecret string
 	httpClient   *http.Client
 	accessToken  string
 	tokenExpiry  time.Time
+	// Cache liste artistes pour que l'ID reste stable (détail par ID)
+	mu           sync.Mutex
+	cachedArtists []models.Artist
+	cacheTime     time.Time
 }
 
 type SpotifyTokenResponse struct {
@@ -148,48 +155,59 @@ func (s *SpotifyClient) authenticate() error {
 // MÉTHODES COMPATIBLES AVEC L'ANCIENNE API
 // ============================================
 
-// FetchArtists récupère la liste d'artistes populaires (remplace l'ancien FetchArtists)
+// FetchArtists récupère la liste d'artistes populaires et la met en cache (IDs stables)
 func (s *SpotifyClient) FetchArtists() ([]models.Artist, error) {
+	s.mu.Lock()
+	if len(s.cachedArtists) > 0 && time.Since(s.cacheTime) < artistsCacheTTL {
+		out := make([]models.Artist, len(s.cachedArtists))
+		copy(out, s.cachedArtists)
+		s.mu.Unlock()
+		return out, nil
+	}
+	s.mu.Unlock()
+
 	spotifyArtists, err := s.FetchPopularArtists()
 	if err != nil {
 		return nil, err
 	}
 
-	// Convertir les artistes Spotify en modèles Artist
 	artists := make([]models.Artist, 0, len(spotifyArtists))
 	for i, sa := range spotifyArtists {
 		artist := models.Artist{
-			ID:           i + 1, // Générer un ID numérique
+			ID:           i + 1,
 			Name:         sa.Name,
 			Image:        "",
-			Members:      []string{}, // Spotify ne fournit pas les membres
-			CreationDate: 0,          // Spotify ne fournit pas l'année de création
-			FirstAlbum:   "",         // Spotify ne fournit pas le premier album
+			Members:      []string{},
+			CreationDate: 0,
+			FirstAlbum:   "",
 			Locations:    "",
 			ConcertDates: "",
 			Relations:    "",
 		}
-
-		// Récupérer l'image si disponible
 		if len(sa.Images) > 0 {
 			artist.Image = sa.Images[0].URL
 		}
-
+		if len(sa.Genres) > 0 {
+			artist.Genres = sa.Genres
+		}
 		artists = append(artists, artist)
 	}
 
+	s.mu.Lock()
+	s.cachedArtists = artists
+	s.cacheTime = time.Now()
+	s.mu.Unlock()
 	return artists, nil
 }
 
-// FetchArtistDetail récupère les détails complets d'un artiste (remplace l'ancien FetchArtistDetail)
+// FetchArtistDetail récupère les détails d'un artiste par ID (utilise le cache pour cohérence)
 func (s *SpotifyClient) FetchArtistDetail(artistID int) (*models.ArtistDetail, error) {
-	// Récupérer tous les artistes pour trouver celui avec l'ID
+	// Utiliser le cache pour retrouver le même artiste que sur la liste
 	artists, err := s.FetchArtists()
 	if err != nil {
 		return nil, fmt.Errorf("erreur lors de la récupération des artistes: %w", err)
 	}
 
-	// Trouver l'artiste
 	var artist *models.Artist
 	for i := range artists {
 		if artists[i].ID == artistID {
@@ -197,49 +215,36 @@ func (s *SpotifyClient) FetchArtistDetail(artistID int) (*models.ArtistDetail, e
 			break
 		}
 	}
-
 	if artist == nil {
 		return nil, fmt.Errorf("artiste avec ID %d non trouvé", artistID)
 	}
 
-	// Récupérer les détails complets depuis Spotify
-	fullArtist, err := s.searchArtistByName(artist.Name)
-	if err != nil {
-		// Si erreur, utiliser les données de base
-		detail := &models.ArtistDetail{
-			Artist:       *artist,
-			ConcertDates: []string{},
-			Locations:    []string{},
-			Relations:    make(map[string][]string),
-			BirthDates:   make(map[string]string),
-			DeathDates:   make(map[string]string),
+	// Copie pour ne pas modifier le cache
+	artistCopy := *artist
+
+	// Enrichir avec l'API Spotify
+	spotifyFull, _ := s.searchArtistByName(artist.Name)
+	if spotifyFull != nil {
+		full, _ := s.GetArtistByID(spotifyFull.ID)
+		if full != nil {
+			if len(full.Images) > 0 {
+				artistCopy.Image = full.Images[0].URL
+			}
+			artistCopy.SpotifyURL = full.ExternalURLs.Spotify
+			artistCopy.Genres = full.Genres
+			artistCopy.Popularity = full.Popularity
+			artistCopy.Followers = full.Followers.Total
 		}
-		return detail, nil
 	}
 
-	// Récupérer les informations complètes
-	spotifyFull, err := s.GetArtistByID(fullArtist.ID)
-	if err != nil {
-		spotifyFull = nil
-	}
-
-	// Construire l'ArtistDetail avec les données Spotify
 	detail := &models.ArtistDetail{
-		Artist:       *artist,
-		ConcertDates: []string{}, // Spotify ne fournit pas les dates de concerts
-		Locations:    []string{}, // Spotify ne fournit pas les lieux
-		Relations:    make(map[string][]string), // Spotify ne fournit pas les relations
+		Artist:       artistCopy,
+		ConcertDates: []string{},
+		Locations:    []string{},
+		Relations:    make(map[string][]string),
 		BirthDates:   make(map[string]string),
 		DeathDates:   make(map[string]string),
 	}
-
-	// Mettre à jour avec les données Spotify si disponibles
-	if spotifyFull != nil {
-		if len(spotifyFull.Images) > 0 {
-			detail.Image = spotifyFull.Images[0].URL
-		}
-	}
-
 	return detail, nil
 }
 

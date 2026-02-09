@@ -428,47 +428,154 @@ main {
 }
 
 /* ============================================
+   PAGE TITLE
+   ============================================ */
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+/* ============================================
    FILTRES
    ============================================ */
 
-.filter-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
+.filters-wrapper {
     margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.filters-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    width: 100%;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
+    min-width: 100px;
 }
 
 .filter-group label {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.filter-group select,
-.filter-group input {
-    padding: 0.75rem 1rem;
+.filter-group input,
+.filter-select {
+    padding: 0.6rem 0.9rem;
     border-radius: var(--radius-md);
     border: 2px solid var(--border-color);
     background: var(--bg-tertiary);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: inherit;
+    font-size: 0.9rem;
     transition: var(--transition);
 }
 
-.filter-group select:focus,
-.filter-group input:focus {
+.filter-select {
+    min-height: 80px;
+    max-width: 140px;
+}
+
+.filter-group input:focus,
+.filter-select:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     background: var(--bg-secondary);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.filter-actions .btn-back {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+}
+
+.api-error-msg {
+    margin-bottom: 1.5rem;
+}
+
+.api-error-title {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.api-error-desc {
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+}
+
+.artist-card-meta {
+    padding: 0 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.artist-card-noimg {
+    width: 100%;
+    height: 280px;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+}
+
+.artists-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+}
+
+.artists-empty p {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.artists-empty a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.artists-empty a:hover {
+    text-decoration: underline;
 }
 
 /* ============================================
@@ -609,6 +716,59 @@ main {
     font-size: 1rem;
 }
 
+.detail-img-placeholder {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 4px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+}
+
+.detail-meta {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.detail-section {
+    margin-top: 1.5rem;
+}
+
+.detail-section > strong {
+    display: block;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.detail-card {
+    background: var(--bg-tertiary);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.75rem;
+}
+
+.detail-card-info {
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.artist-info .btn-spotify {
+    margin-top: 1rem;
+    display: inline-block;
+}
+
 /* ============================================
    PAGE D'ERREUR
    ============================================ */
@@ -661,12 +821,123 @@ footer p {
 }
 
 /* ============================================
+   CARTE INTERACTIVE (PAGE MAP)
+   ============================================ */
+
+.map-container {
+    padding-bottom: 2rem;
+}
+
+.map-intro {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.map-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.map-box {
+    height: 500px;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 0;
+}
+
+.map-overlay-msg {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    padding: 1rem 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    cursor: pointer;
+    text-align: center;
+}
+
+.map-overlay-msg p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.map-overlay-msg strong {
+    color: var(--text-primary);
+}
+
+.map-locations-list {
+    margin-top: 2rem;
+}
+
+.map-locations-list h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.location-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.location-card .location-artists,
+.location-card .location-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.5rem 0;
+    font-size: 0.85rem;
+}
+
+.map-actions {
+    text-align: center;
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* ============================================
    CARTES DE LOCALISATION
    ============================================ */
 
 .location-card {
+    background: var(--bg-secondary);
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
     cursor: pointer;
     transition: var(--transition);
+}
+
+.location-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.location-card h3 a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.detail-intro {
+    color: var(--text-tertiary);
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
 }
 
 .location-card:hover {

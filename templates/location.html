@@ -31,19 +31,16 @@
             </article>
             {{end}}
         {{else}}
-            <div class="text-center" style="grid-column: 1 / -1; padding: 3rem; background: var(--bg-secondary); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
-                <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">
-                    ℹ️ Les informations sur les concerts ne sont pas disponibles via l'API Spotify.
-                </p>
-                <p style="font-size: 1rem; color: var(--text-tertiary);">
-                    L'API Spotify ne fournit pas de données sur les lieux et dates de concerts.
-                </p>
+            <div class="artists-empty" style="grid-column: 1 / -1;">
+                <p>Aucun concert enregistré pour ce lieu.</p>
+                <p>Consultez la <a href="/map">carte interactive</a> pour voir les autres lieux.</p>
             </div>
         {{end}}
     </div>
     
-    <div style="text-align: center; margin-top: 2rem;">
-        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    <div class="map-actions">
+        <a href="/map" class="btn-back">← Retour à la carte</a>
+        <a href="/artists" class="btn-back">Liste des artistes</a>
     </div>
 </div>
 {{end}}

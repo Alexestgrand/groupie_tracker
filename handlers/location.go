@@ -3,43 +3,63 @@ package handlers
 import (
 	"net/http"
 	"net/url"
+	"strings"
 
+	"groupie-tracker-ng/api"
 	"groupie-tracker-ng/models"
 	"groupie-tracker-ng/utils"
 )
 
-// LocationHandler gère la page listant les concerts à un lieu spécifique
+// LocationHandler gère la page listant les concerts à un lieu (données Groupie)
 func LocationHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
 		return
 	}
 
-	// Extraire le lieu de l'URL (format: /location/ville)
 	locationPath := r.URL.Path[len("/location/"):]
-
-	// Valider que le chemin n'est pas vide
 	if locationPath == "" {
 		utils.RenderError(w, http.StatusBadRequest, "Lieu non spécifié")
 		return
 	}
 
 	location, err := url.PathUnescape(locationPath)
-	if err != nil {
-		utils.RenderError(w, http.StatusBadRequest, "Lieu invalide dans l'URL")
+	if err != nil || len(location) < 1 || len(location) > 200 {
+		utils.RenderError(w, http.StatusBadRequest, "Lieu invalide")
 		return
 	}
 
-	// Valider la longueur du lieu
-	if len(location) < 1 || len(location) > 100 {
-		utils.RenderError(w, http.StatusBadRequest, "Nom de lieu invalide")
-		return
-	}
-
-	// Note: Spotify ne fournit pas de données de concerts/lieux
-	// On retourne une liste vide avec un message
 	var relatedArtists []models.Artist
 	concertsByArtist := make(map[int][]string)
+
+	groupieArtists, errA := api.FetchGroupieArtists()
+	relations, errR := api.FetchGroupieRelations()
+	if errA == nil && errR == nil {
+		locationLower := strings.ToLower(location)
+		for _, artist := range groupieArtists {
+			var rel *models.Relation
+			for i := range relations {
+				if relations[i].ID == artist.ID {
+					rel = &relations[i]
+					break
+				}
+			}
+			if rel == nil {
+				continue
+			}
+			var dates []string
+			for loc, d := range rel.DatesLocations {
+				if strings.ToLower(loc) == locationLower {
+					dates = d
+					break
+				}
+			}
+			if len(dates) > 0 {
+				relatedArtists = append(relatedArtists, artist)
+				concertsByArtist[artist.ID] = dates
+			}
+		}
+	}
 
 	data := map[string]interface{}{
 		"Title":            "Concerts à " + location,

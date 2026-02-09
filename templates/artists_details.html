@@ -1,94 +1,72 @@
 {{define "content"}}
 <div class="container detail-container">
     <div class="artist-header fade-in-on-scroll">
+        {{if .Artist.Image}}
         <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img" loading="eager">
+        {{else}}
+        <div class="detail-img detail-img-placeholder">🎵</div>
+        {{end}}
         <div class="artist-info">
             <h1>{{.Artist.Name}}</h1>
-            
-            <div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
-                {{if .Artist.CreationDate}}
-                <p>
-                    <strong style="color: var(--text-primary);">📅 Année de création :</strong> 
-                    <span style="color: var(--text-secondary);">{{.Artist.CreationDate}}</span>
-                </p>
-                {{end}}
-                {{if .Artist.FirstAlbum}}
-                <p>
-                    <strong style="color: var(--text-primary);">💿 Premier album :</strong> 
-                    <span style="color: var(--text-secondary);">{{.Artist.FirstAlbum}}</span>
-                </p>
-                {{end}}
-                {{if .Artist.Members}}
-                <p>
-                    <strong style="color: var(--text-primary);">👥 Nombre de membres :</strong> 
-                    <span style="color: var(--text-secondary);">{{len .Artist.Members}}</span>
-                </p>
-                {{end}}
-            </div>
-            
+            <p class="detail-intro">Découvrez les informations, genres et dates de concerts de l'artiste.</p>
+
+            {{if .Artist.Popularity}}
+            <p class="detail-meta"><strong>Popularité</strong> {{.Artist.Popularity}}/100</p>
+            {{end}}
+            {{if .Artist.Followers}}
+            <p class="detail-meta"><strong>Followers</strong> {{.Artist.Followers}}</p>
+            {{end}}
+
+            {{if .Artist.CreationDate}}
+            <p class="detail-meta"><strong>Année de création</strong> {{.Artist.CreationDate}}</p>
+            {{end}}
+            {{if .Artist.FirstAlbum}}
+            <p class="detail-meta"><strong>Premier album</strong> {{.Artist.FirstAlbum}}</p>
+            {{end}}
             {{if .Artist.Members}}
-            <div class="genres-list" style="margin: 1.5rem 0;">
-                <strong>👤 Membres :</strong>
-                <div style="margin-top: 0.75rem;">
-                    {{range .Artist.Members}}
-                        <span class="genre-tag">{{.}}</span>
-                    {{end}}
+            <p class="detail-meta"><strong>Membres</strong> {{len .Artist.Members}}</p>
+            {{end}}
+
+            {{if .Artist.Genres}}
+            <div class="genres-list">
+                <strong>Genres</strong>
+                <div class="genre-tags">
+                    {{range .Artist.Genres}}<span class="genre-tag">{{.}}</span>{{end}}
                 </div>
             </div>
             {{end}}
 
-            {{if .Artist.BirthDates}}
-            <div class="genres-list" style="margin: 1.5rem 0;">
-                <strong>🎂 Dates de naissance :</strong>
-                <div style="margin-top: 0.75rem;">
-                    {{range $member, $date := .Artist.BirthDates}}
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0;">
-                            <strong>{{$member}}:</strong> {{$date}}
-                        </p>
-                    {{end}}
+            {{if .Artist.Members}}
+            <div class="genres-list">
+                <strong>Membres</strong>
+                <div class="genre-tags">
+                    {{range .Artist.Members}}<span class="genre-tag">{{.}}</span>{{end}}
                 </div>
             </div>
             {{end}}
 
-            {{if .Artist.DeathDates}}
-            <div class="genres-list" style="margin: 1.5rem 0;">
-                <strong>🕯️ Dates de mort :</strong>
-                <div style="margin-top: 0.75rem;">
-                    {{range $member, $date := .Artist.DeathDates}}
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0;">
-                            <strong>{{$member}}:</strong> {{$date}}
-                        </p>
-                    {{end}}
-                </div>
-            </div>
+            {{if .Artist.SpotifyURL}}
+            <a href="{{.Artist.SpotifyURL}}" target="_blank" rel="noopener" class="btn-spotify">Écouter sur Spotify</a>
             {{end}}
 
             {{if .Artist.Relations}}
-            <div style="margin: 2rem 0;">
-                <strong style="color: var(--text-primary); font-size: 1.2rem; display: block; margin-bottom: 1rem;">🎵 Concerts :</strong>
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    {{range $location, $dates := .Artist.Relations}}
-                        <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                            <strong style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">📍 {{$location}}</strong>
-                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                {{range $dates}}
-                                    <span class="genre-tag" style="font-size: 0.8rem;">{{.}}</span>
-                                {{end}}
-                            </div>
-                        </div>
-                    {{end}}
+            <div class="detail-section">
+                <strong>Concerts</strong>
+                {{range $location, $dates := .Artist.Relations}}
+                <div class="detail-card">
+                    <strong>📍 {{$location}}</strong>
+                    <div class="genre-tags">{{range $dates}}<span class="genre-tag">{{.}}</span>{{end}}</div>
                 </div>
+                {{end}}
             </div>
             {{else}}
-            <div style="margin: 2rem 0; padding: 1.5rem; background: var(--bg-tertiary); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <p style="color: var(--text-secondary); text-align: center;">
-                    ℹ️ Les informations sur les concerts ne sont pas disponibles via l'API Spotify.
-                </p>
+            <div class="detail-card detail-card-info">
+                <p>Les dates de concerts ne sont pas disponibles via l’API Spotify.</p>
             </div>
             {{end}}
         </div>
     </div>
-    
+
     <div class="actions fade-in-on-scroll">
         <a href="/artists" class="btn-back">← Retour à la liste</a>
     </div>

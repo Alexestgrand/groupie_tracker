@@ -1,58 +1,78 @@
 {{define "content"}}
-<div class="container">
-    <h1 class="fade-in-on-scroll" style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--text-primary); margin-bottom: 2rem; text-align: center; font-weight: 700;">🗺️ Carte Interactive</h1>
+<div class="container map-container">
+    <h1 class="page-title">Carte interactive</h1>
+    <p class="map-intro">Lieux de concerts des artistes (données Groupie Tracker). Cliquez sur un marqueur pour voir les artistes et dates.</p>
 
-    <div class="fade-in-on-scroll" style="background: var(--bg-secondary); backdrop-filter: blur(20px); padding: 2rem; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); margin-bottom: 2rem;">
-        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
-            Explorez les lieux de concerts et les dates associées. Cliquez sur un lieu pour voir tous les concerts à cet endroit.
-        </p>
-        
-        {{if .Locations}}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-            {{range .Locations}}
-            <div class="location-card" style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); transition: var(--transition);">
-                <h3 style="color: var(--text-primary); font-size: 1.2rem; margin-bottom: 1rem; font-weight: 600;">
-                    📍 <a href="/location/{{.Location}}" style="color: var(--text-primary); text-decoration: none; border-bottom: 2px solid transparent; transition: var(--transition);">{{.Location}}</a>
-                </h3>
-                
-                <div style="margin-bottom: 1rem;">
-                    <strong style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">🎵 Artistes :</strong>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
-                        {{range .Artists}}
-                            <span class="genre-tag" style="font-size: 0.8rem;">{{.}}</span>
-                        {{end}}
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 1rem;">
-                    <strong style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">📅 Dates :</strong>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
-                        {{range .Dates}}
-                            <span class="genre-tag" style="font-size: 0.75rem;">{{.}}</span>
-                        {{end}}
-                    </div>
-                </div>
-                
-                <div style="margin-top: 1rem;">
-                    <a href="/location/{{.Location}}" class="btn-details" style="font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-block; width: 100%; text-align: center;">Voir tous les concerts à {{.Location}}</a>
-                </div>
-            </div>
-            {{end}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <div class="map-wrapper">
+        <div id="map" class="map-box"></div>
+        {{if not .Locations}}
+        <div class="map-overlay-msg" id="map-overlay">
+            <p><strong>Info</strong></p>
+            <p>Impossible de charger les lieux pour le moment. Réessayez plus tard.</p>
         </div>
         {{else}}
-        <div style="text-align: center; padding: 3rem; background: var(--bg-tertiary); border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1rem;">
-                ℹ️ Les informations sur les lieux de concerts ne sont pas disponibles via l'API Spotify.
-            </p>
-            <p style="color: var(--text-tertiary); font-size: 0.9rem;">
-                L'API Spotify fournit des informations sur les artistes, leurs genres et leur popularité, mais pas sur les concerts.
-            </p>
+        <div class="map-overlay-msg map-overlay-dismiss" id="map-overlay">
+            <p><strong>{{len .Locations}} lieu(x)</strong> — Cliquez sur un marqueur pour les détails.</p>
         </div>
         {{end}}
     </div>
-    
-    <div style="text-align: center; margin-top: 2rem;">
-        <a href="/artists" class="btn-back">← Retour à la liste</a>
+
+    {{if .Locations}}
+    <div class="map-locations-list">
+        <h2>Lieux de concerts</h2>
+        <div class="location-cards">
+            {{range .Locations}}
+            <div class="location-card">
+                <h3>📍 <a href="/location/{{.Location}}">{{.Location}}</a></h3>
+                <p class="location-artists">{{range .Artists}}<span class="genre-tag">{{.}}</span>{{end}}</p>
+                <p class="location-dates">{{range .Dates}}<span class="genre-tag">{{.}}</span>{{end}}</p>
+                <a href="/location/{{.Location}}" class="btn-details">Voir les concerts</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+
+    <div class="map-actions">
+        <a href="/artists" class="btn-back">← Retour aux artistes</a>
     </div>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function() {
+    var mapEl = document.getElementById('map');
+    if (!mapEl) return;
+    var map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var locations = {{if .Locations}}[
+        {{range $i, $loc := .Locations}}{{if $i}},{{end}}
+        {"location":{{printf "%q" $loc.Location}},"lat":{{$loc.Lat}},"lng":{{$loc.Lng}},"artists":{{printf "%q" (join $loc.Artists ", ")}},"dates":{{printf "%q" (join $loc.Dates ", ")}}}
+        {{end}}
+    ]{{else}}[]{{end}};
+
+    for (var i = 0; i < locations.length; i++) {
+        var loc = locations[i];
+        var popupContent = '<strong>' + escapeHtml(loc.location) + '</strong><br/>';
+        if (loc.artists) popupContent += 'Artistes: ' + loc.artists + '<br/>';
+        if (loc.dates) popupContent += 'Dates: ' + loc.dates;
+        L.marker([loc.lat, loc.lng]).addTo(map).bindPopup(popupContent);
+    }
+
+    document.getElementById('map-overlay').addEventListener('click', function() {
+        this.style.display = 'none';
+    });
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+    }
+})();
+</script>
 {{end}}
