@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"groupie-tracker-ng/models"
@@ -11,7 +10,6 @@ import (
 
 // SearchHandler gère la recherche d'artistes
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode HTTP est GET
 	if r.Method != http.MethodGet {
 		utils.RenderError(w, http.StatusMethodNotAllowed, "Méthode non autorisée")
 		return
@@ -31,32 +29,19 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Rechercher les artistes sur Spotify
-	spotifyArtists, err := spotifyClient.SearchArtists(query, 20)
+	// Récupérer tous les artistes
+	artists, err := apiClient.FetchArtists()
 	if err != nil {
 		utils.HandleError(w, err, http.StatusInternalServerError)
 		return
 	}
 
-	// Convertir en format Artist
-	artists := make([]models.Artist, len(spotifyArtists))
-	for i, sa := range spotifyArtists {
-		imageURL := ""
-		if len(sa.Images) > 0 {
-			imageURL = sa.Images[0].URL
-		}
-		artists[i] = models.Artist{
-			ID:         sa.ID,
-			Name:       sa.Name,
-			Image:      imageURL,
-			Genres:     sa.Genres,
-			SpotifyURL: fmt.Sprintf("https://open.spotify.com/artist/%s", sa.ID),
-		}
-	}
+	// Rechercher les artistes
+	filteredArtists := utils.SearchArtists(artists, query)
 
 	data := map[string]interface{}{
 		"Title":   "Résultats de recherche pour: " + query,
-		"Artists": artists,
+		"Artists": filteredArtists,
 		"Query":   query,
 	}
 
@@ -65,7 +50,6 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 // SuggestionsHandler retourne des suggestions JSON pour la barre de recherche
 func SuggestionsHandler(w http.ResponseWriter, r *http.Request) {
-	// Vérifier que la méthode HTTP est GET
 	if r.Method != http.MethodGet {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -76,7 +60,7 @@ func SuggestionsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]string{})
+		json.NewEncoder(w).Encode([]models.Artist{})
 		return
 	}
 
@@ -88,27 +72,31 @@ func SuggestionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Récupérer tous les artistes populaires
-	spotifyArtists, err := spotifyClient.FetchPopularArtists()
+	// Récupérer tous les artistes
+	artists, err := apiClient.FetchArtists()
 	if err != nil {
-		// En cas d'erreur, retourner un tableau vide plutôt qu'une erreur
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]string{})
+		json.NewEncoder(w).Encode([]models.Artist{})
 		return
-	}
-
-	// Convertir en format Artist pour utiliser la fonction getSuggestions
-	artists := make([]models.Artist, len(spotifyArtists))
-	for i, sa := range spotifyArtists {
-		artists[i] = models.Artist{
-			ID:   sa.ID,
-			Name: sa.Name,
-		}
 	}
 
 	// Générer les suggestions
 	suggestions := utils.GetSuggestions(artists, query)
 
+	// Convertir en format simple pour le frontend
+	type Suggestion struct {
+		Name string `json:"name"`
+		ID   int    `json:"id"`
+	}
+
+	result := make([]Suggestion, len(suggestions))
+	for i, artist := range suggestions {
+		result[i] = Suggestion{
+			Name: artist.Name,
+			ID:   artist.ID,
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(suggestions)
+	json.NewEncoder(w).Encode(result)
 }
