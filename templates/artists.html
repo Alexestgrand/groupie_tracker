@@ -1,6 +1,47 @@
 {{define "content"}}
-<div class="artists-page">
-    <h1>Liste des Artistes</h1>
-    <p>Fonctionnalité en cours de développement</p>
+<div class="container">
+    <h1>{{.Title}}</h1>
+
+    <section class="controls-section">
+        <div class="search-container">
+            <form action="/search" method="GET" autocomplete="off">
+                <input type="text" id="search-input" name="q" class="search-input" 
+                       placeholder="Rechercher un artiste sur Spotify..." 
+                       value="{{if .Query}}{{.Query}}{{end}}">
+                <div id="suggestions-box" class="suggestions-box"></div>
+                <button type="submit" class="btn-search">Rechercher</button>
+            </form>
+        </div>
+        
+        <div style="margin-top: 10px; text-align: center;">
+            <a href="/artists" class="btn-filter">Voir tous les artistes populaires</a>
+        </div>
+    </section>
+
+    <div class="artists-grid">
+        {{if .Artists}}
+            {{range .Artists}}
+            <article class="artist-card">
+                {{if .Image}}
+                    <img src="{{.Image}}" alt="{{.Name}}">
+                {{else}}
+                    <img src="/static/img/default.png" alt="Pas d'image">
+                {{end}}
+                
+                <h2 class="artist-name">{{.Name}}</h2>
+                
+                <div class="artist-genres">
+                    {{range .Genres}}
+                        <span class="genre-tag">{{.}}</span>
+                    {{end}}
+                </div>
+
+                <a href="/artist/{{.ID}}" class="btn-details">Voir détails</a>
+            </article>
+            {{end}}
+        {{else}}
+            <p>Aucun artiste trouvé.</p>
+        {{end}}
+    </div>
 </div>
 {{end}}

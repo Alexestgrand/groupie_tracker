@@ -182,8 +182,8 @@ var (
 ```go
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
     templates := template.Must(template.ParseFiles(
-        "templates/layout.html",
-        "templates/"+tmpl,
+        "../templates/layout.html",
+        "../templates/"+tmpl,
     ))
     templates.ExecuteTemplate(w, "layout", data)
 }
