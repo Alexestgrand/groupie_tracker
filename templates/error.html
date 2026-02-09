@@ -3,10 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erreur</title>
+    <title>{{.Title}} - Groupie Tracker</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <h1>Erreur</h1>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="/" class="logo"> Groupie Tracker</a>
+                <ul class="nav-links">
+                    <li><a href="/">Accueil</a></li>
+                    <li><a href="/artists">Artistes</a></li>
+                    <li><a href="/map">Carte</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="error-page">
+            <h1>{{.StatusCode}}</h1>
+            <h2>{{.Title}}</h2>
+            <p>{{.Message}}</p>
+            <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; ça c le groupie tracker frérot fé pas chier</p>
+        </div>
+    </footer>
 </body>
 </html>

@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-// renderTemplate rend un template HTML avec les données fournies
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	// 1. Parser les templates
 	templates, err := template.ParseFiles(
