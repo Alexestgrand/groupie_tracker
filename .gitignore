@@ -1,0 +1,14 @@
+# Environment and secrets (never commit credentials)
+.env
+.env.local
+.env.*.local
+
+# Go
+go.sum
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
