@@ -164,6 +164,20 @@ header {
     color: var(--text-muted);
 }
 
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    transition: var(--transition);
+}
+
+.logo:hover {
+    color: var(--accent-primary);
+}
+
 .nav-links {
     display: flex;
     align-items: center;
@@ -559,6 +573,13 @@ select:focus {
     font-size: 0.78rem;
     color: var(--text-muted);
     display: flex;
+    gap: 3rem;
+    background: var(--bg-secondary);
+    padding: 3rem;
+    border-radius: var(--radius-xl);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
     flex-wrap: wrap;
     gap: 0.25rem 0.6rem;
 }

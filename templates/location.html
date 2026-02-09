@@ -1,0 +1,50 @@
+{{define "content"}}
+<div class="container">
+    <h1 class="fade-in-on-scroll" style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); color: var(--text-primary); margin-bottom: 2rem; text-align: center; font-weight: 700;">{{.Title}}</h1>
+
+    <div class="artists-grid">
+        {{if .Artists}}
+            {{range .Artists}}
+            <article class="artist-card fade-in-on-scroll">
+                {{if .Image}}
+                    <img src="{{.Image}}" alt="{{.Name}}" loading="lazy">
+                {{else}}
+                    <div style="width: 100%; height: 280px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        Pas d'image
+                    </div>
+                {{end}}
+                
+                <h2 class="artist-name">{{.Name}}</h2>
+                
+                {{if index $.ConcertsByArtist .ID}}
+                <div style="padding: 0 1rem; margin-bottom: 1rem;">
+                    <strong style="color: var(--text-primary); display: block; margin-bottom: 0.5rem;">📅 Dates de concerts :</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {{range index $.ConcertsByArtist .ID}}
+                            <span class="genre-tag" style="font-size: 0.75rem;">{{.}}</span>
+                        {{end}}
+                    </div>
+                </div>
+                {{end}}
+
+                <a href="/artist/{{.ID}}" class="btn-details">Voir détails</a>
+            </article>
+            {{end}}
+        {{else}}
+            <div class="text-center" style="grid-column: 1 / -1; padding: 3rem; background: var(--bg-secondary); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border: 1px solid var(--border-color);">
+                <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    ℹ️ Les informations sur les concerts ne sont pas disponibles via l'API Spotify.
+                </p>
+                <p style="font-size: 1rem; color: var(--text-tertiary);">
+                    L'API Spotify ne fournit pas de données sur les lieux et dates de concerts.
+                </p>
+            </div>
+        {{end}}
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    </div>
+</div>
+{{end}}
+

@@ -5,34 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}} - Groupie Tracker</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 <body>
     <header>
         <nav class="navbar">
-            <div class="container">
-                <a href="/" class="logo"> Groupie Tracker</a>
-                <ul class="nav-links">
-                    <li><a href="/">Accueil</a></li>
-                    <li><a href="/artists">Artistes</a></li>
-                    <li><a href="/map">Carte</a></li>
-                </ul>
-            </div>
+            <a href="/" class="logo">Groupie Tracker</a>
+            <ul class="nav-links">
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/artists">Artistes</a></li>
+                <li><a href="/map">Carte</a></li>
+            </ul>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <span id="theme-icon">🌙</span>
+            </button>
         </nav>
     </header>
 
     <main class="container">
-        <div class="error-page">
+        <div class="error-page fade-in-on-scroll">
             <h1>{{.StatusCode}}</h1>
             <h2>{{.Title}}</h2>
             <p>{{.Message}}</p>
-            <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+            <a href="/" class="btn-primary">🏠 Retour à l'accueil</a>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; ça c le groupie tracker frérot fé pas chier</p>
+            <p>&copy; 2024 Groupie Tracker - Découvrez la musique autrement</p>
         </div>
     </footer>
+    <script src="/static/js/script.js"></script>
 </body>
 </html>
