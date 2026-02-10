@@ -2,25 +2,44 @@
 <div class="container detail-container">
     {{if .Artist}}
     <div class="artist-header fade-in-on-scroll">
-        {{if .Artist.Image}}
-        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img" loading="eager">
-        {{else}}
-        <div class="detail-img detail-img-placeholder">🎵</div>
-        {{end}}
+        <div class="artist-header-image">
+            {{if .Artist.Image}}
+            <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img" loading="eager">
+            {{else}}
+            <div class="detail-img detail-img-placeholder">🎵</div>
+            {{end}}
+        </div>
         <div class="artist-info">
             <h1>{{.Artist.Name}}</h1>
-            <p class="detail-intro">Découvrez les informations, genres et dates de concerts de l'artiste.</p>
+            <p class="detail-intro">Découvrez toutes les informations sur cet artiste</p>
 
-            {{if .Artist.Popularity}}
-            <p class="detail-meta"><strong>Popularité</strong> {{.Artist.Popularity}}/100</p>
-            {{end}}
-            {{if .Artist.Followers}}
-            <p class="detail-meta"><strong>Followers</strong> {{.Artist.Followers}}</p>
-            {{end}}
+            <div class="detail-stats">
+                {{if .Artist.Popularity}}
+                <div class="stat-item">
+                    <span class="stat-label">Popularité</span>
+                    <span class="stat-value">{{.Artist.Popularity}}/100</span>
+                </div>
+                {{end}}
+                {{if .Artist.Followers}}
+                <div class="stat-item">
+                    <span class="stat-label">Followers</span>
+                    <span class="stat-value">{{.Artist.Followers | formatNumber}}</span>
+                </div>
+                {{end}}
+                {{if .Artist.CreationDate}}
+                <div class="stat-item">
+                    <span class="stat-label">Année de création</span>
+                    <span class="stat-value">{{.Artist.CreationDate}}</span>
+                </div>
+                {{end}}
+            </div>
 
-            <p class="detail-meta"><strong>Année de création</strong> {{if .Artist.CreationDate}}{{.Artist.CreationDate}}{{else}}—{{end}}</p>
-            <p class="detail-meta"><strong>Premier album</strong> {{if .Artist.FirstAlbum}}{{.Artist.FirstAlbum}}{{else}}—{{end}}</p>
-            <p class="detail-meta"><strong>Membres</strong> {{if .Artist.Members}}{{len .Artist.Members}}{{else}}—{{end}}</p>
+            {{if .Artist.FirstAlbum}}
+            <div class="detail-album-info">
+                <span class="album-label">Premier album</span>
+                <span class="album-name">{{.Artist.FirstAlbum}}</span>
+            </div>
+            {{end}}
 
             {{if .Artist.Genres}}
             <div class="genres-list">
@@ -42,22 +61,6 @@
 
             {{if .Artist.SpotifyURL}}
             <a href="{{.Artist.SpotifyURL}}" target="_blank" rel="noopener" class="btn-spotify">Écouter sur Spotify</a>
-            {{end}}
-
-            {{if and .Artist.Relations (gt (len .Artist.Relations) 0)}}
-            <div class="detail-section">
-                <strong>Concerts</strong>
-                {{range $location, $dates := .Artist.Relations}}
-                <div class="detail-card">
-                    <strong>📍 {{$location}}</strong>
-                    <div class="genre-tags">{{range $dates}}<span class="genre-tag">{{.}}</span>{{end}}</div>
-                </div>
-                {{end}}
-            </div>
-            {{else}}
-            <div class="detail-card detail-card-info">
-                <p><strong>Concerts</strong> — L’API Spotify ne fournit pas de lieux ni dates de concerts.</p>
-            </div>
             {{end}}
         </div>
     </div>
