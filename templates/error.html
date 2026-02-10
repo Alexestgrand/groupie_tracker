@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Groupie Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="/" class="logo">Groupie Tracker</a>
+            <ul class="nav-links">
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/artists">Artistes</a></li>
+                <li><a href="/map">Carte</a></li>
+            </ul>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="error-page fade-in-on-scroll">
+            <h1>{{if .StatusCode}}{{.StatusCode}}{{else}}Erreur{{end}}</h1>
+            <h2>{{if .Title}}{{.Title}}{{else}}Erreur{{end}}</h2>
+            <p>{{if .Message}}{{.Message}}{{else}}Une erreur s'est produite.{{end}}</p>
+            <a href="/" class="btn-primary">🏠 Retour à l'accueil</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Groupie Tracker - Découvrez la musique autrement</p>
+        </div>
+    </footer>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

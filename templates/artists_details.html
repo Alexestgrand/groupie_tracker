@@ -1,0 +1,125 @@
+{{define "content"}}
+<div class="container detail-container">
+    {{if .Artist}}
+    <div class="artist-header fade-in-on-scroll">
+        {{if .Artist.Image}}
+        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}" class="detail-img" loading="eager">
+        {{else}}
+        <div class="detail-img detail-img-placeholder">🎵</div>
+        {{end}}
+        <div class="artist-info">
+            <h1>{{.Artist.Name}}</h1>
+            <p class="detail-intro">Découvrez les informations, genres et dates de concerts de l'artiste.</p>
+
+            {{if .Artist.Popularity}}
+            <p class="detail-meta"><strong>Popularité</strong> {{.Artist.Popularity}}/100</p>
+            {{end}}
+            {{if .Artist.Followers}}
+            <p class="detail-meta"><strong>Followers</strong> {{.Artist.Followers}}</p>
+            {{end}}
+
+            <p class="detail-meta"><strong>Année de création</strong> {{if .Artist.CreationDate}}{{.Artist.CreationDate}}{{else}}—{{end}}</p>
+            <p class="detail-meta"><strong>Premier album</strong> {{if .Artist.FirstAlbum}}{{.Artist.FirstAlbum}}{{else}}—{{end}}</p>
+            <p class="detail-meta"><strong>Membres</strong> {{if .Artist.Members}}{{len .Artist.Members}}{{else}}—{{end}}</p>
+
+            {{if .Artist.Genres}}
+            <div class="genres-list">
+                <strong>Genres</strong>
+                <div class="genre-tags">
+                    {{range .Artist.Genres}}<span class="genre-tag">{{.}}</span>{{end}}
+                </div>
+            </div>
+            {{end}}
+
+            {{if .Artist.Members}}
+            <div class="genres-list">
+                <strong>Membres</strong>
+                <div class="genre-tags">
+                    {{range .Artist.Members}}<span class="genre-tag">{{.}}</span>{{end}}
+                </div>
+            </div>
+            {{end}}
+
+            {{if .Artist.SpotifyURL}}
+            <a href="{{.Artist.SpotifyURL}}" target="_blank" rel="noopener" class="btn-spotify">Écouter sur Spotify</a>
+            {{end}}
+
+            {{if and .Artist.Relations (gt (len .Artist.Relations) 0)}}
+            <div class="detail-section">
+                <strong>Concerts</strong>
+                {{range $location, $dates := .Artist.Relations}}
+                <div class="detail-card">
+                    <strong>📍 {{$location}}</strong>
+                    <div class="genre-tags">{{range $dates}}<span class="genre-tag">{{.}}</span>{{end}}</div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="detail-card detail-card-info">
+                <p><strong>Concerts</strong> — L’API Spotify ne fournit pas de lieux ni dates de concerts.</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    {{if .Artist.TopTracks}}
+    <section class="detail-section fade-in-on-scroll">
+        <h2>Top titres</h2>
+        <ul class="track-list">
+            {{range .Artist.TopTracks}}
+            <li class="track-item">
+                <span class="track-name">{{.Name}}</span>
+                {{if .AlbumName}}<span class="track-album">{{.AlbumName}}</span>{{end}}
+                <span class="track-duration">{{.DurationMs | formatDuration}}</span>
+                {{if .PreviewURL}}<a href="{{.PreviewURL}}" target="_blank" rel="noopener" class="track-preview" title="Aperçu">▶</a>{{end}}
+                {{if .SpotifyURL}}<a href="{{.SpotifyURL}}" target="_blank" rel="noopener" class="track-spotify">Spotify</a>{{end}}
+            </li>
+            {{end}}
+        </ul>
+    </section>
+    {{end}}
+
+    {{if .Artist.Albums}}
+    <section class="detail-section fade-in-on-scroll">
+        <h2>Albums</h2>
+        <div class="album-grid">
+            {{range .Artist.Albums}}
+            <a href="{{.SpotifyURL}}" target="_blank" rel="noopener" class="album-card">
+                {{if .ImageURL}}<img src="{{.ImageURL}}" alt="{{.Name}}" class="album-cover" loading="lazy">{{else}}<div class="album-cover album-cover-placeholder">💿</div>{{end}}
+                <div class="album-info">
+                    <strong>{{.Name}}</strong>
+                    <span>{{.ReleaseDate}}</span>
+                    <span>{{.TotalTracks}} pistes</span>
+                </div>
+            </a>
+            {{end}}
+        </div>
+    </section>
+    {{end}}
+
+    {{if .Artist.RelatedArtists}}
+    <section class="detail-section fade-in-on-scroll">
+        <h2>Artistes similaires</h2>
+        <div class="related-grid">
+            {{range .Artist.RelatedArtists}}
+            <a href="{{.SpotifyURL}}" target="_blank" rel="noopener" class="related-card">
+                {{if .ImageURL}}<img src="{{.ImageURL}}" alt="{{.Name}}" class="related-img" loading="lazy">{{else}}<div class="related-img related-img-placeholder">🎤</div>{{end}}
+                <strong>{{.Name}}</strong>
+                {{if .Genres}}<div class="genre-tags">{{range .Genres}}<span class="genre-tag">{{.}}</span>{{end}}</div>{{end}}
+            </a>
+            {{end}}
+        </div>
+    </section>
+    {{end}}
+
+    <div class="actions fade-in-on-scroll">
+        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    </div>
+    {{else}}
+    <div class="error-page">
+        <p>Artiste non trouvé.</p>
+        <a href="/artists" class="btn-back">← Retour à la liste</a>
+    </div>
+    {{end}}
+</div>
+{{end}}
