@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Documentation détaillée (non versionnée)
+CODE_DOCUMENTATION.md
+
 # Go
 go.sum
 
