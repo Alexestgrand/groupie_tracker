@@ -146,9 +146,17 @@ func NewSpotifyClient(clientID, clientSecret string) *SpotifyClient {
 
 // authenticate obtient un token d'accès Spotify
 func (s *SpotifyClient) authenticate() error {
-	// Vérifier si le token est encore valide
-	if s.accessToken != "" && time.Now().Before(s.tokenExpiry) {
+	// Vérifier si le token est encore valide (avec une marge de 1 minute)
+	if s.accessToken != "" && time.Now().Add(1*time.Minute).Before(s.tokenExpiry) {
 		return nil
+	}
+
+	// Vérifier que les credentials sont configurés
+	if s.clientID == "" || s.clientID == "your_client_id_here" {
+		return fmt.Errorf("SPOTIFY_CLIENT_ID non configuré - définissez la variable d'environnement")
+	}
+	if s.clientSecret == "" || s.clientSecret == "your_client_secret_here" {
+		return fmt.Errorf("SPOTIFY_CLIENT_SECRET non configuré - définissez la variable d'environnement")
 	}
 
 	// Préparer les données pour la requête
@@ -167,22 +175,34 @@ func (s *SpotifyClient) authenticate() error {
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("erreur lors de la requête d'authentification: %w", err)
+		return fmt.Errorf("erreur réseau lors de l'authentification: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode == http.StatusUnauthorized {
+			return fmt.Errorf("credentials Spotify invalides - vérifiez SPOTIFY_CLIENT_ID et SPOTIFY_CLIENT_SECRET")
+		}
 		return fmt.Errorf("erreur d'authentification Spotify (code %d): %s", resp.StatusCode, string(body))
 	}
 
 	var tokenResp SpotifyTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return fmt.Errorf("erreur lors du parsing de la réponse: %w", err)
+		return fmt.Errorf("erreur lors du parsing de la réponse d'authentification: %w", err)
+	}
+
+	if tokenResp.AccessToken == "" {
+		return fmt.Errorf("token d'accès vide reçu de Spotify")
 	}
 
 	s.accessToken = tokenResp.AccessToken
-	s.tokenExpiry = time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+	// Expiry avec une marge de sécurité
+	expirySeconds := tokenResp.ExpiresIn
+	if expirySeconds == 0 {
+		expirySeconds = 3600 // Par défaut 1 heure
+	}
+	s.tokenExpiry = time.Now().Add(time.Duration(expirySeconds) * time.Second)
 
 	return nil
 }
@@ -202,37 +222,65 @@ func (s *SpotifyClient) FetchArtists() ([]models.Artist, error) {
 	}
 	s.mu.Unlock()
 
+	// Récupérer les artistes depuis Spotify
 	spotifyArtists, err := s.FetchPopularArtists()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("erreur lors de la récupération des artistes Spotify: %w", err)
 	}
 
+	if len(spotifyArtists) == 0 {
+		return nil, fmt.Errorf("aucun artiste récupéré depuis Spotify")
+	}
+
+	// Convertir les artistes Spotify en modèles Artist avec année de création
 	artists := make([]models.Artist, 0, len(spotifyArtists))
 	for i, sa := range spotifyArtists {
 		artist := models.Artist{
-			ID:           i + 1,
-			Name:         sa.Name,
-			Image:        "",
-			Members:      []string{},
-			CreationDate: 0,
-			FirstAlbum:   "",
-			Locations:    "",
-			ConcertDates: "",
-			Relations:    "",
+			ID:            i + 1,
+			Name:          sa.Name,
+			Image:         "",
+			Members:       []string{},
+			CreationDate:  0,
+			FirstAlbum:    "",
+			FirstAlbumDate: "",
+			Locations:     "",
+			ConcertDates:  "",
+			Relations:     "",
+			Genres:        []string{},
 		}
+		
+		// Récupérer l'image la plus grande disponible
 		if len(sa.Images) > 0 {
 			artist.Image = sa.Images[0].URL
 		}
+		
+		// Copier les genres
 		if len(sa.Genres) > 0 {
-			artist.Genres = sa.Genres
+			artist.Genres = make([]string, len(sa.Genres))
+			copy(artist.Genres, sa.Genres)
 		}
+		
+		// Récupérer le premier album pour obtenir l'année de création
+		firstAlbum, firstAlbumDate, creationYear := s.getFirstAlbumAndYear(sa.ID)
+		if firstAlbum != "" {
+			artist.FirstAlbum = firstAlbum
+		}
+		if firstAlbumDate != "" {
+			artist.FirstAlbumDate = firstAlbumDate
+		}
+		if creationYear > 0 {
+			artist.CreationDate = creationYear
+		}
+		
 		artists = append(artists, artist)
 	}
 
+	// Mettre en cache
 	s.mu.Lock()
 	s.cachedArtists = artists
 	s.cacheTime = time.Now()
 	s.mu.Unlock()
+	
 	return artists, nil
 }
 
@@ -284,6 +332,20 @@ func (s *SpotifyClient) FetchArtistDetail(artistID int) (*models.ArtistDetail, e
 			artistCopy.Followers = full.Followers.Total
 			detail.Artist = artistCopy
 
+			// Mettre à jour l'année de création et le premier album si pas déjà défini
+			if detail.Artist.CreationDate == 0 || detail.Artist.FirstAlbum == "" {
+				firstAlbum, firstAlbumDate, creationYear := s.getFirstAlbumAndYear(full.ID)
+				if creationYear > 0 {
+					detail.Artist.CreationDate = creationYear
+				}
+				if firstAlbum != "" {
+					detail.Artist.FirstAlbum = firstAlbum
+				}
+				if firstAlbumDate != "" {
+					detail.Artist.FirstAlbumDate = firstAlbumDate
+				}
+			}
+			
 			// Top titres, albums, artistes similaires (ignorer erreurs pour ne pas casser la page)
 			if tracks, err := s.getArtistTopTracks(full.ID); err == nil && len(tracks) > 0 {
 				detail.TopTracks = tracks
@@ -376,10 +438,19 @@ func (s *SpotifyClient) searchArtistByName(artistName string) (*SpotifyArtist, e
 // SearchArtists recherche plusieurs artistes sur Spotify
 func (s *SpotifyClient) SearchArtists(query string, limit int) ([]SpotifyArtist, error) {
 	if err := s.authenticate(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("authentification requise: %w", err)
 	}
 
-	searchURL := fmt.Sprintf("%s/search?q=%s&type=artist&limit=%d", SpotifyAPIURL, url.QueryEscape(query), limit)
+	// Limiter le nombre de résultats à 50 (limite API Spotify)
+	if limit > 50 {
+		limit = 50
+	}
+	if limit < 1 {
+		limit = 1
+	}
+
+	searchURL := fmt.Sprintf("%s/search?q=%s&type=artist&limit=%d&market=FR", 
+		SpotifyAPIURL, url.QueryEscape(query), limit)
 
 	req, err := http.NewRequest("GET", searchURL, nil)
 	if err != nil {
@@ -387,12 +458,28 @@ func (s *SpotifyClient) SearchArtists(query string, limit int) ([]SpotifyArtist,
 	}
 
 	req.Header.Set("Authorization", "Bearer "+s.accessToken)
+	req.Header.Set("Accept", "application/json")
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("erreur lors de la requête: %w", err)
+		return nil, fmt.Errorf("erreur réseau lors de la recherche: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		// Token expiré, réessayer une fois
+		s.accessToken = "" // Forcer le renouvellement
+		if err := s.authenticate(); err != nil {
+			return nil, fmt.Errorf("erreur de ré-authentification: %w", err)
+		}
+		// Réessayer la requête
+		req.Header.Set("Authorization", "Bearer "+s.accessToken)
+		resp, err = s.httpClient.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("erreur réseau lors de la recherche (retry): %w", err)
+		}
+		defer resp.Body.Close()
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -401,10 +488,18 @@ func (s *SpotifyClient) SearchArtists(query string, limit int) ([]SpotifyArtist,
 
 	var searchResp SpotifySearchResponse
 	if err := json.NewDecoder(resp.Body).Decode(&searchResp); err != nil {
-		return nil, fmt.Errorf("erreur lors du parsing: %w", err)
+		return nil, fmt.Errorf("erreur lors du parsing de la réponse: %w", err)
 	}
 
-	return searchResp.Artists.Items, nil
+	// Filtrer les artistes sans nom
+	var validArtists []SpotifyArtist
+	for _, artist := range searchResp.Artists.Items {
+		if artist.Name != "" && artist.ID != "" {
+			validArtists = append(validArtists, artist)
+		}
+	}
+
+	return validArtists, nil
 }
 
 // GetArtistByID récupère un artiste complet par son ID Spotify
@@ -518,6 +613,70 @@ func (s *SpotifyClient) getArtistAlbums(spotifyArtistID string) ([]models.AlbumI
 	return out, nil
 }
 
+// getFirstAlbumAndYear récupère le premier album d'un artiste, sa date de sortie et l'année de création
+func (s *SpotifyClient) getFirstAlbumAndYear(spotifyArtistID string) (string, string, int) {
+	if err := s.authenticate(); err != nil {
+		return "", "", 0
+	}
+	
+	// Récupérer les albums triés par date (les plus anciens en premier)
+	u := fmt.Sprintf("%s/artists/%s/albums?limit=50&market=FR&include_groups=album", SpotifyAPIURL, spotifyArtistID)
+	req, err := http.NewRequest("GET", u, nil)
+	if err != nil {
+		return "", "", 0
+	}
+	req.Header.Set("Authorization", "Bearer "+s.accessToken)
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return "", "", 0
+	}
+	defer resp.Body.Close()
+	
+	if resp.StatusCode != http.StatusOK {
+		return "", "", 0
+	}
+	
+	var data spotifyArtistAlbumsResp
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return "", "", 0
+	}
+	
+	if len(data.Items) == 0 {
+		return "", "", 0
+	}
+	
+	// Trouver le premier album (le plus ancien)
+	oldestAlbum := data.Items[0]
+	oldestDate := ""
+	oldestYear := 0
+	
+	for _, album := range data.Items {
+		if album.ReleaseDate == "" {
+			continue
+		}
+		// Parse la date (format peut être YYYY, YYYY-MM, ou YYYY-MM-DD)
+		var year int
+		if len(album.ReleaseDate) >= 4 {
+			fmt.Sscanf(album.ReleaseDate[:4], "%d", &year)
+		}
+		if year > 0 && (oldestYear == 0 || year < oldestYear) {
+			oldestYear = year
+			oldestAlbum = album
+			oldestDate = album.ReleaseDate
+		}
+	}
+	
+	if oldestYear > 0 {
+		return oldestAlbum.Name, oldestDate, oldestYear
+	}
+	
+	// Si pas d'année trouvée, retourner le premier album sans année
+	if oldestAlbum.ReleaseDate != "" {
+		return oldestAlbum.Name, oldestAlbum.ReleaseDate, 0
+	}
+	return oldestAlbum.Name, "", 0
+}
+
 // getRelatedArtists récupère les artistes similaires
 func (s *SpotifyClient) getRelatedArtists(spotifyArtistID string) ([]models.RelatedArtistInfo, error) {
 	if err := s.authenticate(); err != nil {
@@ -557,42 +716,102 @@ func (s *SpotifyClient) getRelatedArtists(spotifyArtistID string) ([]models.Rela
 	return out, nil
 }
 
-// FetchPopularArtists récupère une liste d'artistes populaires
+// FetchPopularArtists récupère une liste d'artistes populaires depuis Spotify
 func (s *SpotifyClient) FetchPopularArtists() ([]SpotifyArtist, error) {
 	// Vérifier l'authentification une seule fois
 	if err := s.authenticate(); err != nil {
-		return nil, fmt.Errorf("Spotify: %w", err)
+		return nil, fmt.Errorf("erreur d'authentification Spotify: %w", err)
 	}
 
-	queries := []string{"rock", "pop", "rap", "jazz", "electronic", "indie", "metal"}
+	// Liste de requêtes variées pour obtenir une diversité d'artistes
+	queries := []string{
+		"year:2020-2025",           // Artistes récents
+		"genre:rock",               // Rock
+		"genre:pop",                // Pop
+		"genre:hip-hop",            // Hip-hop/Rap
+		"genre:jazz",               // Jazz
+		"genre:electronic",          // Électronique
+		"genre:indie",              // Indie
+		"genre:metal",              // Metal
+		"genre:country",            // Country
+		"genre:reggae",             // Reggae
+		"genre:blues",              // Blues
+		"genre:classical",          // Classique
+		"tag:new",                  // Nouveautés
+		"tag:hipster",              // Artistes émergents
+	}
+
 	var allArtists []SpotifyArtist
 	seen := make(map[string]bool)
+	targetCount := 100 // Objectif : au moins 100 artistes
 
+	// Première passe : récupérer des artistes avec différentes requêtes
 	for _, query := range queries {
-		artists, err := s.SearchArtists(query, 15)
+		if len(allArtists) >= targetCount {
+			break
+		}
+		
+		artists, err := s.SearchArtists(query, 20)
 		if err != nil {
+			// Continuer avec la requête suivante en cas d'erreur
 			continue
 		}
+		
 		for _, artist := range artists {
-			if !seen[artist.ID] {
+			if !seen[artist.ID] && artist.Name != "" {
 				allArtists = append(allArtists, artist)
 				seen[artist.ID] = true
 			}
 		}
 	}
 
-	// Si aucune requête n'a rien renvoyé, une dernière tentative large
-	if len(allArtists) == 0 {
+	// Si on n'a pas assez d'artistes, utiliser des recherches par nom d'artistes populaires
+	if len(allArtists) < 50 {
+		popularArtistNames := []string{
+			"The Weeknd", "Taylor Swift", "Ed Sheeran", "Drake", "Ariana Grande",
+			"Billie Eilish", "Post Malone", "Dua Lipa", "Bad Bunny", "The Beatles",
+			"Queen", "Michael Jackson", "Elvis Presley", "Madonna", "Eminem",
+			"Rihanna", "Beyoncé", "Adele", "Bruno Mars", "Justin Bieber",
+			"Coldplay", "Imagine Dragons", "Maroon 5", "OneRepublic", "The Chainsmokers",
+			"Calvin Harris", "David Guetta", "Martin Garrix", "Avicii", "Skrillex",
+		}
+
+		for _, name := range popularArtistNames {
+			if len(allArtists) >= targetCount {
+				break
+			}
+			
+			artists, err := s.SearchArtists(name, 5)
+			if err != nil {
+				continue
+			}
+			
+			for _, artist := range artists {
+				if !seen[artist.ID] && artist.Name != "" {
+					allArtists = append(allArtists, artist)
+					seen[artist.ID] = true
+				}
+			}
+		}
+	}
+
+	// Dernière tentative : recherche générique si toujours pas assez
+	if len(allArtists) < 20 {
 		artists, err := s.SearchArtists("artist", 50)
 		if err != nil {
-			return nil, fmt.Errorf("aucun artiste récupéré: %w", err)
+			return nil, fmt.Errorf("impossible de récupérer des artistes: %w", err)
 		}
+		
 		for _, artist := range artists {
-			if !seen[artist.ID] {
+			if !seen[artist.ID] && artist.Name != "" {
 				allArtists = append(allArtists, artist)
 				seen[artist.ID] = true
 			}
 		}
+	}
+
+	if len(allArtists) == 0 {
+		return nil, fmt.Errorf("aucun artiste récupéré depuis Spotify - vérifiez vos credentials")
 	}
 
 	return allArtists, nil

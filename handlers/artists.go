@@ -34,12 +34,16 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 	// Appliquer les filtres (adaptés pour Spotify)
 	filterOptions := utils.ParseFilterOptions(r.URL.Query())
 	
-	// Note: Spotify ne fournit pas de lieux de concerts, donc on ignore ce filtre
-	// Appliquer les autres filtres (année, membres, etc.)
+	// Appliquer les filtres (année, membres, premier album)
 	artists = utils.FilterArtists(artists, filterOptions)
+	
+	// Filtrer par lieux si demandé
+	if len(filterOptions.Locations) > 0 {
+		artists = utils.FilterArtists(artists, filterOptions)
+	}
 
-	// Spotify ne fournit pas de lieux, donc liste vide
-	locationsList := []string{}
+	// Récupérer la liste des lieux populaires pour le filtre
+	locationsList := utils.GetPopularLocations()
 
 	// Préparer les données pour les filtres
 	minYear := ""
@@ -50,6 +54,9 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 	if filterOptions.MaxYear > 0 {
 		maxYear = strconv.Itoa(filterOptions.MaxYear)
 	}
+	
+	firstAlbumMin := filterOptions.FirstAlbumMin
+	firstAlbumMax := filterOptions.FirstAlbumMax
 
 	// Vérifier quels nombres de membres sont sélectionnés
 	memberSelected := make(map[int]bool)
@@ -70,6 +77,8 @@ func ArtistsHandler(w http.ResponseWriter, r *http.Request) {
 		"Locations":       locationsList,
 		"MinYear":         minYear,
 		"MaxYear":         maxYear,
+		"FirstAlbumMin":   firstAlbumMin,
+		"FirstAlbumMax":   firstAlbumMax,
 		"Member1":         memberSelected[1],
 		"Member2":         memberSelected[2],
 		"Member3":         memberSelected[3],

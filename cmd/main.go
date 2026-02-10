@@ -15,8 +15,6 @@ func main() {
 	http.HandleFunc("/artist/", handlers.ArtistDetailHandler)
 	http.HandleFunc("/search", handlers.SearchHandler)
 	http.HandleFunc("/suggestions", handlers.SuggestionsHandler)
-	http.HandleFunc("/map", handlers.MapHandler)
-	http.HandleFunc("/location/", handlers.LocationHandler)
 	http.HandleFunc("/gims", handlers.GimsHandler)
 
 	port := ":8000"

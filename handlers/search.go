@@ -37,7 +37,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	filterOptions := utils.ParseFilterOptions(r.URL.Query())
 	filteredArtists = utils.FilterArtists(filteredArtists, filterOptions)
 
-	locationsList := []string{}
+	// Récupérer la liste des lieux populaires pour le filtre
+	locationsList := utils.GetPopularLocations()
 	minYear := ""
 	maxYear := ""
 	if filterOptions.MinYear > 0 {
@@ -46,6 +47,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	if filterOptions.MaxYear > 0 {
 		maxYear = strconv.Itoa(filterOptions.MaxYear)
 	}
+	firstAlbumMin := filterOptions.FirstAlbumMin
+	firstAlbumMax := filterOptions.FirstAlbumMax
 	memberSelected := make(map[int]bool)
 	for _, mc := range filterOptions.MemberCount {
 		memberSelected[mc] = true
@@ -62,6 +65,8 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		"Locations":        locationsList,
 		"MinYear":          minYear,
 		"MaxYear":          maxYear,
+		"FirstAlbumMin":    firstAlbumMin,
+		"FirstAlbumMax":    firstAlbumMax,
 		"Member1":          memberSelected[1],
 		"Member2":          memberSelected[2],
 		"Member3":          memberSelected[3],

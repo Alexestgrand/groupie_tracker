@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initThemeToggle();
     initSearchSuggestions();
+    initFilters();
 });
 
 // ============================================
@@ -182,4 +183,69 @@ function initSearchSuggestions() {
         suggestionsBox.style.display = 'none';
         selectedIndex = -1;
     }
+}
+
+// ============================================
+// GESTION DES FILTRES
+// ============================================
+
+function initFilters() {
+    const filtersToggle = document.querySelector('.filters-toggle');
+    const filtersContent = document.querySelector('.filters-content');
+    const filtersToggleIcon = document.querySelector('.filters-toggle-icon');
+    
+    if (!filtersToggle || !filtersContent) return;
+    
+    // Vérifier s'il y a des filtres actifs
+    const hasActiveFilters = document.querySelector('input[type="number"][value]:not([value=""]), input[type="text"][value]:not([value=""]), input[type="checkbox"]:checked, select option:checked');
+    
+    // Par défaut, les filtres sont ouverts (affichés)
+    // On peut les fermer si aucun filtre n'est actif
+    let isOpen = true;
+    
+    if (!hasActiveFilters) {
+        // Si pas de filtres actifs, on peut commencer fermé
+        // Mais pour l'instant, on les laisse ouverts pour faciliter l'accès
+        isOpen = true;
+    }
+    
+    // Mettre à jour l'icône selon l'état initial
+    if (filtersToggleIcon) {
+        filtersToggleIcon.textContent = isOpen ? '▲' : '▼';
+    }
+    
+    if (!isOpen) {
+        filtersContent.classList.add('filters-closed');
+    }
+    
+    // Toggle au clic
+    filtersToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isCurrentlyOpen = !filtersContent.classList.contains('filters-closed');
+        
+        if (isCurrentlyOpen) {
+            filtersContent.classList.add('filters-closed');
+            if (filtersToggleIcon) filtersToggleIcon.textContent = '▼';
+        } else {
+            filtersContent.classList.remove('filters-closed');
+            if (filtersToggleIcon) filtersToggleIcon.textContent = '▲';
+        }
+    });
+    
+    // Améliorer l'UX des checkboxes
+    const checkboxes = document.querySelectorAll('.filter-checkbox input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Animation visuelle
+            const label = this.closest('.filter-checkbox');
+            if (this.checked) {
+                label.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    label.style.transform = '';
+                }, 200);
+            }
+        });
+    });
 }

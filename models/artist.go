@@ -7,7 +7,8 @@ type Artist struct {
 	Name         string   `json:"name"`
 	Members      []string `json:"members"`
 	CreationDate int      `json:"creationDate"`
-	FirstAlbum   string   `json:"firstAlbum"`
+	FirstAlbum   string   `json:"firstAlbum"`      // Nom du premier album
+	FirstAlbumDate string `json:"firstAlbumDate"`  // Date de sortie du premier album (YYYY-MM-DD ou YYYY)
 	Locations    string   `json:"locations"`
 	ConcertDates string   `json:"concertDates"`
 	Relations    string   `json:"relations"`
@@ -16,6 +17,7 @@ type Artist struct {
 	Genres     []string `json:"-"`
 	Popularity int      `json:"-"`
 	Followers  int      `json:"-"`
+	Country    string   `json:"-"` // Pays d'origine (si disponible)
 }
 
 // Location représente les lieux de concerts d'un artiste
