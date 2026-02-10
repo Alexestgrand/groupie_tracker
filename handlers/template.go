@@ -19,11 +19,23 @@ func formatDuration(ms int) string {
 	return fmt.Sprintf("%d:%02d", sec/60, sec%60)
 }
 
+// formatNumber formate un nombre avec des séparateurs de milliers
+func formatNumber(n int) string {
+	if n < 1000 {
+		return fmt.Sprintf("%d", n)
+	}
+	if n < 1000000 {
+		return fmt.Sprintf("%.1fK", float64(n)/1000)
+	}
+	return fmt.Sprintf("%.1fM", float64(n)/1000000)
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	funcMap := template.FuncMap{
 		"join":           strings.Join,
 		"urlpath":        url.PathEscape,
 		"formatDuration": formatDuration,
+		"formatNumber":   formatNumber,
 	}
 	// 1. Parser les templates (join + urlpath pour les listes et liens)
 	templates, err := template.New("").Funcs(funcMap).ParseFiles(
